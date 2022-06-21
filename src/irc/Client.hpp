@@ -8,10 +8,13 @@ private:
 	int                              _status;
 	Response                         _response;
 	Request                          _request;
+    bool                             _isAuthorised;
 
 public:
-	            Client(int fd): _socketFD(fd), _status(READING) {};
+	            Client(int fd): _socketFD(fd), _status(WRITING), _isAuthorised(0) {};
 	            ~Client(){};
+    bool        isAuth(){return _isAuthorised;}
+    void        setIsAuthorised(){_isAuthorised = true;}
 	int         getStatus() const {return _status;};
     Request&    getRequest(){return _request;};
     Response&    getResponse(){return _response;};

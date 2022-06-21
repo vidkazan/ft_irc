@@ -6,11 +6,8 @@
 void        Client::generateResponse()
 {
     std::string bufResp;
-//    if(_status == STATUS_AUTH) {
-//        bufResp += ":ft_irc NOTICE AUTH :*** ";
-//        bufResp += "Hallo mein Freund! Du brauchst zu LOG IN. PASS, NICK, USER, du nimst...\n";
-//    }
-//    else {
+    if(_isAuthorised)
+    {
         switch (_request.getRequestErrors()) {
             case ERROR_REQUEST_NOT_VALID: {
                 bufResp += "HTTP/1.1 400 Bad Request\n";
@@ -38,7 +35,11 @@ void        Client::generateResponse()
                 break;
             }
         }
-//    }
+    }
+    else
+    {
+        bufResp += ":ft_irc Auth please via PASS\n";
+    }
     allocateResponse(bufResp);
     _status = WRITING;
 }
@@ -60,6 +61,7 @@ void        Client::sendResponse()
         size = _response.getResponseSize() - _response.getBytesSent();
     else
         size = 999999999;
+    std::cout << "send: " << getSocketFd() << "msg: " << _response.getResponse() << "\n";
     ret = send(_socketFD, _response.getResponse() + _response.getBytesSent(),size,0x80000); //  SIGPIPE ignore
     if(ret <= 0)
     {
