@@ -25,6 +25,7 @@
 #include "irc/Request.hpp"
 #include "irc/Response.hpp"
 #include "irc/Client.hpp"
+#include "irc/Chan.hpp"
 #include "server/PortServer.hpp"
 #include "server/Irc.hpp"
 

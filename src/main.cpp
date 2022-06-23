@@ -50,13 +50,15 @@ int     main(int argc, char ** argv)
                     largestFD = it->getSocketFd();
             }
 		}
-		// SELECT
-		std::cout << "select:\n";
+
+        // SELECT
+		std::cout << "\nselect:\n";
 		if(select(largestFD + 1, &readfds, &writefds,0,0) < 0)
 		{
 			printLog("","Irc: select error",RED);
 			exit(EXIT_FAILURE);
 		}
+
 		// checking all connections for closing
 		for(std::vector<Client>::iterator it = Irc.getClients().begin();it != Irc.getClients().end(); it++){
 			if(it->getStatus() == CLOSING)
@@ -68,22 +70,19 @@ int     main(int argc, char ** argv)
 			}
 		}
 //        mainPrint(Irc);
-           // finding an event in client sockets array
+       // finding an event in client sockets array
         for(std::vector<Client>::iterator it = Irc.getClients().begin();it != Irc.getClients().end(); it++)
         {
             if(Irc.getClients().empty())
                 break;
             // finding a read event in client sockets array
-            if (FD_ISSET(it->getSocketFd(), &readfds)){
+            if (FD_ISSET(it->getSocketFd(), &readfds))
+            {
                 std::cout << "read: " << it->getSocketFd() << "\n";
                 it->readRequest();
-            if(it->getStatus() == WRITING)
-            {
-                it->generateResponse();
-            }
                 break;
             }
-                // finding a write event in client sockets array
+            // finding a write event in client sockets array
             else if(FD_ISSET(it->getSocketFd(), &writefds))
             {
                 std::cout << "write: " << it->getSocketFd() << "\n";
@@ -106,10 +105,25 @@ int     main(int argc, char ** argv)
             }
 //				std::cout << SOME << "new client: " << fd << WHITE << "\n";
             fcntl(fd, F_SETFL, O_NONBLOCK);
-            Irc.addClient(fd);
+            Irc.addClient(fd, &Irc);
             Irc.getClients().back().generateResponse();
             std::cout << "new client " << fd << ": generate AUTH MSG\n";
         }
+        for(std::vector<Client>::iterator it = Irc.getClients().begin();it != Irc.getClients().end(); it++)
+        {
+            if(Irc.getClients().empty())
+                break;
+            // checking all connections for closing
+            if(it->getStatus() == CLOSING)
+            {
+                std::cout << SOME << "close: " << it->getSocketFd() << WHITE << "\n";
+                close(it->getSocketFd());
+                Irc.getClients().erase(it);
+                break;
+            }
+
+        }
+
 	}
 	// very bad place:)
 	return 0;

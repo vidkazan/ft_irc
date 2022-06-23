@@ -7,11 +7,23 @@
 void        Client::readRequest()
 {
     recvBuffer();
-    if (_request.getBuffer().find("\r\n\r\n") != std::string::npos) {
-        parseRequestHeader();
-        _status = WRITING;
+    size_t pos;
+    while(_request.getBuffer().find('\n')  != std::string::npos)
+    {
+        pos = _request.getBuffer().find('\n');
+        std::string line;
+        if (pos != std::string::npos) {
+            line = _request.getBuffer().substr(0, pos);
+        std::cout << "line " << line <<  "\n";
+            parseRequest(line);
+            analyseRequest(line);
+            std::cout << "buf_before: |" << _request.getBuffer() << "| \n";
+            _request.setBuffer(_request.getBuffer().substr(pos + 1, _request.getBuffer().size() - pos));
+            std::cout << "buf_after: |" << _request.getBuffer() << "| \n";
+        }
     }
 }
+
 void        Client::recvBuffer(){
     ssize_t ret;
     char buf[100000];
@@ -25,4 +37,5 @@ void        Client::recvBuffer(){
     }
     _request.addBytesReceieved(ret);
     _request.appendBuffer(buf, ret);
+    std::cout << _request.getBuffer() << "\n";
 }

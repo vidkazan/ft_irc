@@ -10,6 +10,11 @@ enum responseCodeStates{
     CODE_NOT_SET = 0
 };
 
+enum responseType{
+    PRIVATE,
+    CHANNEL
+};
+
 class Response{
 private:
 	size_t              _bytesSent;
@@ -18,6 +23,8 @@ private:
 	bool                _requestIsValid;
 	bool                _methodIsAllowed;
 	responseCodeStates  _responseCodes;
+    std::string         _msgBuf;
+    bool                _toCloseTheConnection;
 
 public:
 	Response() : _bytesSent(0),\
@@ -26,6 +33,12 @@ public:
 				_requestIsValid(true), \
 				_methodIsAllowed(false), \
                 _responseCodes(CODE_NOT_SET){};
+    bool                toCloseTheConnection(){return _toCloseTheConnection;}
+    void                setToCloseTheConnection(bool to){_toCloseTheConnection = to;}
+    void                setMsgBuf(std::string msg){
+        _msgBuf = msg;
+    }
+    std::string         getMsgBuf(){return _msgBuf;}
 	virtual             ~Response(){};
 	responseCodeStates  &getResponseCodes(){return _responseCodes;};
 	void                setResponseCode(int code){_responseCodes = static_cast<responseCodeStates>(code);}

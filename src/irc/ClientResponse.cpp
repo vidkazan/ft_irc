@@ -5,8 +5,12 @@
 
 void        Client::generateResponse()
 {
+//    std::cout << "log " << _socketFD << " _isAuthorisedPass " << _isAuthorisedPass << "\n" \
+//    "_msgUnAuthorisedMsg " << _msgUnAuthorisedMsg << "\n" \
+//    "_msgWrongPassMsg " << _msgWrongPassMsg << "\n" \
+//    "_msgStarMsg " << _msgStarMsg << "\n";
     std::string bufResp;
-    if(_isAuthorised)
+    if(_isAuthorisedPass && _isAuthorisedNickUser && !_msgStarMsg)
     {
         switch (_request.getRequestErrors()) {
             case ERROR_REQUEST_NOT_VALID: {
@@ -30,7 +34,6 @@ void        Client::generateResponse()
                 break;
             }
             case NO_ERROR: {
-                bufResp = "HTTP/1.1 200 OK\r\n";
                 _response.setResponseCode(200);
                 break;
             }
@@ -38,7 +41,23 @@ void        Client::generateResponse()
     }
     else
     {
-        bufResp += ":ft_irc Auth please via PASS\n";
+        if(_msgWrongPassMsg) {
+            bufResp += ":ft_irc Wrong password\n";
+            _msgWrongPassMsg = false;
+        }
+        else if(_msgUnAuthorisedMsg)
+        {
+            bufResp += ":ft_irc NOTICE AUTH :please via PASS\n";
+            _msgUnAuthorisedMsg = false;
+        }
+        else if(_isAuthorisedNickUser && _isAuthorisedPass && _msgStarMsg)
+        {
+            bufResp += ":ft_irc 001 ";
+            bufResp += _nickname;
+            bufResp += " :Welcomeeeeeeee!";
+            bufResp +=" \n";
+            _msgStarMsg = false;
+        }
     }
     allocateResponse(bufResp);
     _status = WRITING;
@@ -52,6 +71,7 @@ void        Client::allocateResponse(std::string bufResp){
         res[i] = bufResp[i];
     }
     _response.setResponse(res,i);
+    _status = WRITING;
 }
 void        Client::sendResponse()
 {
@@ -61,21 +81,26 @@ void        Client::sendResponse()
         size = _response.getResponseSize() - _response.getBytesSent();
     else
         size = 999999999;
-    std::cout << "send: " << getSocketFd() << "msg: " << _response.getResponse() << "\n";
-    ret = send(_socketFD, _response.getResponse() + _response.getBytesSent(),size,0x80000); //  SIGPIPE ignore
-    if(ret <= 0)
-    {
-        Response response;
-        setResponse(response);
-        Request request;
-        _request = request;
-        free(_response.getResponse());
-        setStatus(CLOSING);
-        return;
+    if(_response.getResponseSize()) {
+        std::cout << "send: " << getSocketFd() << "msg: " << _response.getResponse() << "\n";
+        ret = send(_socketFD, _response.getResponse() + _response.getBytesSent(), size, 0x80000); //  SIGPIPE ignore
+        if (ret <= 0) {
+            std::cout << "send " << _socketFD << ": " << "set to CLOSING" << "  \n";
+            Response response;
+            setResponse(response);
+            Request request;
+            _request = request;
+            free(_response.getResponse());
+            setStatus(CLOSING);
+            return;
+        }
+        _response.addBytesSent(ret);
+//        std::cout << "send " << _socketFD << ": " << " sent " << _response.getBytesSent() << " respSize "
+//                  << _response.getResponseSize() << "  \n";
     }
-    _response.addBytesSent(ret);
     if(_response.getBytesSent() == (size_t)_response.getResponseSize())
     {
+//        std::cout << "send " << _socketFD << ": " << "set to READING" <<  "  \n";
         setStatus(READING);
         free(_response.getResponse());
         Response response;

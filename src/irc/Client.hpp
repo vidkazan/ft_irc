@@ -1,6 +1,8 @@
 #pragma once
 #include "../main.hpp"
 
+class Irc;
+class Chan;
 
 class Client {
 private:
@@ -8,34 +10,35 @@ private:
 	int                              _status;
 	Response                         _response;
 	Request                          _request;
-    bool                             _isAuthorised;
+    Irc*                             _irc;
+//                      Names
+    std::string                      _nickname;
+    std::string                      _username;
+    std::string                      _realname;
+//                      Auth
+    bool                             _isAuthorisedPass;
+    bool                             _isAuthorisedNickUser;
+    bool                             _msgUnAuthorisedMsg;
+    bool                             _msgWrongPassMsg;
+    bool                             _msgStarMsg;
+//                      Chans
+    std::vector<Chan>                _chans;
 
 public:
-	            Client(int fd): _socketFD(fd), _status(WRITING), _isAuthorised(0) {};
+                Client(int fd, Irc* irc);
 	            ~Client(){};
-    bool        isAuth(){return _isAuthorised;}
-    void        setIsAuthorised(){_isAuthorised = true;}
+    std::string getNickName(){return _nickname;}
+    bool        isAuth(){return _isAuthorisedPass;}
+    void        setIsAuthorised(){_isAuthorisedPass = true;}
 	int         getStatus() const {return _status;};
     Request&    getRequest(){return _request;};
-    Response&    getResponse(){return _response;};
+    Response&   getResponse(){return _response;};
 	int         getSocketFd() const{return _socketFD;}
 	void        setStatus(int status){_status = status;}
     void        setResponse(const Response&response){_response = response;}
     void        printStates(const std::string& place)
     {
         std::cout << YELLOW << place << "\n";
-        switch (_request.getReadStatus()) {
-            case 0:
-                std::cout << "REQUEST_READ_WAITING_FOR_HEADER ";
-                break;
-            case 1:
-                std::cout << "REQUEST_READ_HEADER ";
-                break;
-            case 2:
-                std::cout << "REQUEST_READ_COMPLETE ";
-                break;
-        }
-        std::cout << "\n";
         switch (_request.getRequestMethod()) {
             case 0:
                 std::cout << "NO_METHOD ";
@@ -51,6 +54,18 @@ public:
                 break;
             case 4:
                 std::cout << "USER ";
+                break;
+            case 5:
+                std::cout << "PRIVMSG ";
+                break;
+            case 6:
+                std::cout << "JOIN ";
+                break;
+            case 7:
+                std::cout << "QUIT ";
+                break;
+            case 8:
+                std::cout << "PONG ";
                 break;
         }
         std::cout << "\n";
@@ -76,12 +91,12 @@ public:
 
 //              ClientRequestParse.cpp
 
-    void        parseRequestHeader();
-    void        parseRequestTypeOptionVersion(std::string str);
+    void        parseRequest(std::string);
 
 //              ClientRequestAnalyse.cpp
 
-    void        analyseRequest();
+    void        analyseRequest(std::string);
+    bool        checkPassword(std::string);
 
 //              ClientResponse.cpp
 
@@ -93,5 +108,10 @@ public:
 
     void        readRequest();
     void        recvBuffer();
+
+//              ClientRequestChans.cpp
+    void        addChannel(Chan&);
+    void        removeChannel(Chan&);
+
 };
 

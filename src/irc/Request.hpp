@@ -6,13 +6,11 @@ enum RequestMethod{
 	OTHER_METHOD,
     PASS,
     NICK,
-    USER
-};
-
-enum ReadStatus{
-	REQUEST_READ_WAITING_FOR_HEADER,
- 	REQUEST_READ_HEADER,
- 	REQUEST_READ_COMPLETE,
+    USER,
+    PRIVMSG,
+    JOIN,
+    QUIT,
+    PING,
 };
 
 enum RequestErrors {
@@ -31,7 +29,6 @@ private:
 	std::string                     _buffer;
 	ssize_t                         _maxBodySize;
 	size_t                          _count;
-	ReadStatus		                _readStatus;
 	RequestMethod	                _requestMethod;
 	RequestErrors	                _requestErrors;
     size_t                          _bytesReceieved;
@@ -41,7 +38,6 @@ public:
 				_buffer(""),\
 				_maxBodySize(-1), \
 				_count(0), \
-				_readStatus(REQUEST_READ_WAITING_FOR_HEADER), \
 				_requestMethod(NO_METHOD), \
 				_requestErrors(NO_ERROR), \
                 _bytesReceieved(0)
@@ -51,10 +47,8 @@ public:
 		}
 	};
 	virtual                         ~Request(){}
-	ReadStatus                      getReadStatus() const{return _readStatus;}
 	RequestMethod                   &getRequestMethod(){return _requestMethod;};
 	RequestErrors                   &getRequestErrors(){return _requestErrors;};
-	void	                        setReadStatus(int readStatus){_readStatus = static_cast<ReadStatus>(readStatus);}
 	void	                        setRequestMethod(int m){_requestMethod = static_cast<RequestMethod>(m);}
 	void	                        setRequestErrors(int m){_requestErrors = static_cast<RequestErrors>(m);}
 	short                           getRequestId(){return _id;};
