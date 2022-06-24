@@ -86,7 +86,7 @@ public:
             std::cout << "Chan " << " " << it->getName() << "\n";
         }
     }
-    void                    setMsgToClient(std::string nickname, std::string msg){
+    void                    setMsgToClient(std::string senderNickname, std::string nickname, std::string msg){
         if(findClientByNickName(nickname))
             findClientByNickName(nickname)->allocateResponse(msg);
     }

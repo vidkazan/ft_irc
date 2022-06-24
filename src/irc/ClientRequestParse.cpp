@@ -10,34 +10,32 @@ void        Client::parseRequest(std::string str)
     if(pos != std::string::npos) {
         _request.setType(str.substr(0, pos));
         str.erase(0,pos+1);
-        if(_request.getType() == "PASS")
-            _request.setRequestMethod(PASS);
-        else if(_request.getType() == "NICK")
-            _request.setRequestMethod(NICK);
-        else if(_request.getType() == "USER")
-            _request.setRequestMethod(USER);
-        else if(_request.getType() == "JOIN")
-            _request.setRequestMethod(JOIN);
-        else if(_request.getType() == "PING")
-            _request.setRequestMethod(PING);
-        else if(_request.getType() == "PRIVMSG")
-            _request.setRequestMethod(PRIVMSG);
-        else
-            _request.setRequestMethod(NO_METHOD);
     }
-    else if(!str.empty())
-    {
-
+    else if(!str.empty()) {
         _request.setType(str);
-        if(_request.getType() == "QUIT")
-        {
-            std::cout << "found QUIT\n";
-            _request.setRequestMethod(QUIT);
-        }
-        else
-            _request.setRequestMethod(OTHER_METHOD);
     }
     else {
         _request.setRequestMethod(NO_METHOD);
+        return;
+    }
+    if(_request.getType() == "PASS")
+        _request.setRequestMethod(PASS);
+    else if(_request.getType() == "NICK")
+        _request.setRequestMethod(NICK);
+    else if(_request.getType() == "USER")
+        _request.setRequestMethod(USER);
+    else if(_request.getType() == "JOIN")
+        _request.setRequestMethod(JOIN);
+    else if(_request.getType() == "PING")
+        _request.setRequestMethod(PING);
+    else if(_request.getType() == "PRIVMSG")
+        _request.setRequestMethod(PRIVMSG);
+    else if(_request.getType() == "QUIT")
+    {
+        std::cout << "QUIT\n";
+        _request.setRequestMethod(QUIT);
+    }
+    else {
+        _request.setRequestMethod(OTHER_METHOD);
     }
 }

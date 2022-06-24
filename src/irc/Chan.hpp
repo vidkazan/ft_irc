@@ -43,5 +43,13 @@ public:
         }
         // TODO remove Chan from Client obj
     }
+    bool findClient(std::string nickname){
+        for(std::vector<std::string>::iterator it = _clients.begin();it != _clients.end(); it++){
+            if(nickname == *it) {
+                return 1;
+            }
+        }
+        return 0;
+    }
     void setMsgToAllClients(std::string, Irc*);
 };

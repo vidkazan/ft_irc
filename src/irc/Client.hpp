@@ -19,7 +19,6 @@ private:
     bool                             _isAuthorisedPass;
     bool                             _isAuthorisedNickUser;
     bool                             _msgUnAuthorisedMsg;
-    bool                             _msgWrongPassMsg;
     bool                             _msgStarMsg;
 //                      Chans
     std::vector<Chan>                _chans;
@@ -112,6 +111,5 @@ public:
 //              ClientRequestChans.cpp
     void        addChannel(Chan&);
     void        removeChannel(Chan&);
-
 };
 
