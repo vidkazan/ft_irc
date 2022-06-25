@@ -22,6 +22,8 @@ private:
     bool                             _msgStarMsg;
 //                      Chans
     std::vector<Chan>                _chans;
+    //                  Attrs
+    std::vector<std::string>                _attrs;
 
 public:
                 Client(int fd, Irc* irc);
@@ -66,6 +68,15 @@ public:
             case 8:
                 std::cout << "PONG ";
                 break;
+            case 9:
+                std::cout << "LIST ";
+                break;
+            case 10:
+                std::cout << "NAMES ";
+                break;
+            case 11:
+                std::cout << "TOPIC ";
+                break;
         }
         std::cout << "\n";
         switch (_request.getRequestErrors()) {
@@ -96,6 +107,7 @@ public:
 
     void        analyseRequest(std::string);
     bool        checkPassword(std::string);
+    void        generateNamesRPL(std::string);
 
 //              ClientResponse.cpp
 

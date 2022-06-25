@@ -14,6 +14,10 @@ void        Client::readRequest()
         std::string line;
         if (pos != std::string::npos) {
             line = _request.getBuffer().substr(0, pos);
+        size_t pos1 = line.find('\r');
+        if(pos1 != std::string::npos) {
+            line.erase(pos1,1);
+        }
         std::cout << "line " << line <<  "\n";
             parseRequest(line);
             analyseRequest(line);

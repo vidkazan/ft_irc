@@ -31,11 +31,13 @@ void        Client::parseRequest(std::string str)
     else if(_request.getType() == "PRIVMSG")
         _request.setRequestMethod(PRIVMSG);
     else if(_request.getType() == "QUIT")
-    {
-        std::cout << "QUIT\n";
         _request.setRequestMethod(QUIT);
-    }
-    else {
+    else if(_request.getType() == "LIST")
+        _request.setRequestMethod(LIST);
+    else if(_request.getType() == "NAMES")
+        _request.setRequestMethod(NAMES);
+    else if(_request.getType() == "PART")
+        _request.setRequestMethod(PART);
+    else
         _request.setRequestMethod(OTHER_METHOD);
-    }
 }

@@ -52,7 +52,7 @@ int     main(int argc, char ** argv)
 		}
 
         // SELECT
-		std::cout << "\nselect:\n";
+//		std::cout << "\nselect:\n";
 		if(select(largestFD + 1, &readfds, &writefds,0,0) < 0)
 		{
 			printLog("","Irc: select error",RED);

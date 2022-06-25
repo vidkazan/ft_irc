@@ -11,6 +11,9 @@ enum RequestMethod{
     JOIN,
     QUIT,
     PING,
+    LIST,
+    NAMES,
+    PART,
 };
 
 enum RequestErrors {

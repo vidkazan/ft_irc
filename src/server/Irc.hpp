@@ -60,19 +60,22 @@ public:
 		Client client(fd, irc);
 		_clients.push_back(client);
 	}
-    void                        addChannel(std::string name, std::string nickname)
+    bool                        addChannel(std::string name, std::string nickname)
     {
         for(std::vector<Chan>::iterator it = _channels.begin();it != _channels.end(); it++){
             if(it->getName() == name)
             {
-                it->addClient(nickname);
-                return;
+                if(it->addClient(nickname))
+                    return 1;
+                else
+                    return 0; // already there
             }
         }
         std::cout << "irc: create new chan: " << name << " by " << nickname << "\n";
         Chan chan(nickname,name);
         _channels.push_back(chan);
         _channels.back().addClient(nickname);
+        return 1;
     }
     void                     printAllClients()
     {
@@ -80,11 +83,17 @@ public:
             std::cout << "Client " << it->getSocketFd() << " " << it->getNickName() << "\n";
         }
     }
-    void                     printAllChannels()
+    std::string              channelsList(std::string nickname)
     {
+        std::string buf;
+//        :irc.colosolutions.net 321 pepego1 Channel :Users  Name
+        buf +=":"+_serverName+" 321 Channel :Users  Name\n";
         for(std::vector<Chan>::iterator it = getChannels().begin();it != getChannels().end(); it++){
-            std::cout << "Chan " << " " << it->getName() << "\n";
+            std::cout << _serverName << " " << it->getName() << "\n";
+            buf += ":"+_serverName+" 322 "+nickname+" "+it->getName()+" "+ std::to_string(it->getChanClientsCount()) +" :"+it->getTopic()+"\n";
         }
+        buf += ":"+_serverName+" 323 "+":End of /LIST\n";
+        return buf;
     }
     void                    setMsgToClient(std::string senderNickname, std::string nickname, std::string msg){
         if(findClientByNickName(nickname))
