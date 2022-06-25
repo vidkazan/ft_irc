@@ -38,6 +38,16 @@ void        Client::parseRequest(std::string str)
         _request.setRequestMethod(NAMES);
     else if(_request.getType() == "PART")
         _request.setRequestMethod(PART);
+    else if(_request.getType() == "NOTICE")
+        _request.setRequestMethod(NOTICE);
+    else if(_request.getType() == "TOPIC")
+        _request.setRequestMethod(TOPIC);
+    else if(_request.getType() == "INVITE")
+        _request.setRequestMethod(INVITE);
+    else if(_request.getType() == "KICK")
+        _request.setRequestMethod(KICK);
+    else if(_request.getType() == "MODE")
+        _request.setRequestMethod(MODE);
     else
         _request.setRequestMethod(OTHER_METHOD);
 }

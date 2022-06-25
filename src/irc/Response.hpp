@@ -23,12 +23,12 @@ enum responseCodeStates{
 //    - Sent to a user when they have joined the maximum
 //    number of allowed channels and they try to join
 //    another channel.
-    ERR_TOOMANYCHANNELS = 405,
+//    ERR_TOOMANYCHANNELS = 405,
 
 //    "<nickname> :There was no such nickname"
 //    - Returned by WHOWAS to indicate there is no history
 //    information for that nickname.
-    ERR_WASNOSUCHNICK = 406,
+//    ERR_WASNOSUCHNICK = 406,
 
 //    "<target> :Duplicate recipients. No message \
 //        delivered"
@@ -36,7 +36,7 @@ enum responseCodeStates{
 //    PRIVMSG/NOTICE using the user@host destination format
 //    and for a user@host which has several occurrences.
 //    has several occurrences.
-    ERR_TOOMANYTARGETS = 407,
+//    ERR_TOOMANYTARGETS = 407,
 
 //    ":No recipient given (<command>)"
     ERR_NORECIPIENT = 411,
@@ -65,7 +65,7 @@ enum responseCodeStates{
 //    - Returned after receiving a NICK message which contains
 //    characters which do not fall in the defined set.  See
 //    section x.x.x for details on valid nicknames.
-    ERR_ERRONEUSNICKNAME = 432,
+//    ERR_ERRONEUSNICKNAME = 432,
 
 //    "<nick> :Nickname is already in use"
 //    - Returned when a NICK message is processed that results
@@ -77,7 +77,7 @@ enum responseCodeStates{
 //    - Returned by a server to a client when it detects a
 //    nickname collision (registered of a NICK that
 //    already exists by another server).
-    ERR_NICKCOLLISION = 436,
+//    ERR_NICKCOLLISION = 436,
 
 //    "<nick> <channel> :They aren't on that channel"
 //    - Returned by the server to indicate that the target
@@ -124,51 +124,15 @@ enum responseCodeStates{
 //    - Any command requiring operator privileges to operate
 //    must return this error to indicate the attempt was
 //    unsuccessful.
-    ERR_NOPRIVILEGES = 481,
+//    ERR_NOPRIVILEGES = 481,
 
 //    "<channel> :You're not channel operator"
 //    - Any command requiring 'chanop' privileges (such as
 //    MODE messages) must return this error if the client
 //    making the attempt is not a chanop on the specified
 //    channel.
-
     ERR_CHANOPRIVSNEEDED = 482,
-//    "<channel> :No topic is set"
-    RPL_NOTOPIC = 331,
 
-//    "<channel> :<topic>"
-    RPL_TOPIC = 332,
-
-//    "<channel> <# visible> :<topic>"
-    RPL_LIST = 322,
-
-//    "Channel :Users  Name"
-    RPL_LISTSTART = 321,
-
-//    ":End of /LIST"
-//    - Replies RPL_LISTSTART, RPL_LIST, RPL_LISTEND mark
-//    the start, actual replies with data and end of the
-//    server's response to a LIST command.  If there are
-//    no channels available to return, only the start
-    RPL_LISTEND = 323,
-
-    // "<nick> :<away message>"
-    RPL_AWAY = 301,
-
-
-     RPL_NAMREPLY = 353,
-//    "<channel> :[[@|+]<nick> [[@|+]<nick> [...]]]"
-     RPL_ENDOFNAMES = 366,
-//    "<channel> :End of /NAMES list"
-//    - To reply to a NAMES message, a reply pair consisting
-//    of RPL_NAMREPLY and RPL_ENDOFNAMES is sent by the
-//    server back to the client.  If there is no channel
-//    found as in the query, then only RPL_ENDOFNAMES is
-//    returned.  The exception to this is when a NAMES
-//    message is sent with no parameters and all visible
-//    channels and contents are sent back in a series of
-//    RPL_NAMEREPLY messages with a RPL_ENDOFNAMES to mark
-//    the end.
 
     // PASS
 //    ERR_NEEDMOREPARAMS , +
@@ -183,17 +147,16 @@ enum responseCodeStates{
 
     // JOIN
 //    ERR_NEEDMOREPARAMS, +
-//    ERR_INVITEONLYCHAN,
+    ERR_INVITEONLYCHAN = 473,
 //    ERR_CHANNELISFULL,
-//    ERR_NOSUCHCHANNEL,
-//    RPL_TOPIC,
+//    ERR_NOSUCHCHANNEL,+
 //    ERR_BANNEDFROMCHAN,
 //    ERR_BADCHANNELKEY,
 //    ERR_TOOMANYCHANNELS,
 
     // PART
-//    ERR_NOTONCHANNEL,
-//    ERR_NOSUCHCHANNEL,
+//    ERR_NOTONCHANNEL,+
+//    ERR_NOSUCHCHANNEL,+
 
     // MODE
 
@@ -202,31 +165,23 @@ enum responseCodeStates{
 //    RPL_NOTOPIC,
 //    ERR_CHANOPRIVSNEEDED,
 //    ERR_NOTONCHANNEL,
-//    RPL_TOPIC,
-
-//  NAMES
-//    RPL_NAMREPLY,
-//    RPL_ENDOFNAMES,
 
 //     LIST
-//    ERR_NOSUCHSERVER
-//    RPL_LIST
-//    RPL_LISTSTART
-//    RPL_LISTEND
+//    ERR_NOSUCHSERVER+
 
     // PRIVMSG
 //    ERR_NORECIPIENT, +
 //    ERR_CANNOTSENDTOCHAN, +
 //    ERR_NOSUCHNICK, +
-//    RPL_AWAY
 //    ERR_NOTEXTTOSEND, +
 //    ERR_TOOMANYTARGETS,
 
-    // KILL
-//    ERR_NOPRIVILEGES,
-//    ERR_NOSUCHNICK,
-//    ERR_NEEDMOREPARAMS,
-//    ERR_CANTKILLSERVER,
+    //KICK
+//    ERR_NEEDMOREPARAMS +
+//    ERR_NOTONCHANNEL +
+//    ERR_NOSUCHCHANNEL +
+//    ERR_CHANOPRIVSNEEDED
+
     REGISTERED = 1,
     CODE_NOT_SET = 0,
 };
@@ -236,25 +191,14 @@ private:
 	size_t              _bytesSent;
 	char*               _response;
 	ssize_t             _responseSize;
-	bool                _requestIsValid;
-	bool                _methodIsAllowed;
 	responseCodeStates  _responseCodes;
-    std::string         _msgBuf;
-    bool                _toCloseTheConnection;
 
 public:
 	Response() : _bytesSent(0),\
 				_response(nullptr), \
 				_responseSize(-1), \
-				_requestIsValid(true), \
-				_methodIsAllowed(false), \
                 _responseCodes(CODE_NOT_SET){};
-    bool                toCloseTheConnection(){return _toCloseTheConnection;}
-    void                setToCloseTheConnection(bool to){_toCloseTheConnection = to;}
-    void                setMsgBuf(std::string msg){
-        _msgBuf = msg;
-    }
-    std::string         getMsgBuf(){return _msgBuf;}
+
 	virtual             ~Response(){};
 	responseCodeStates  &getResponseCodes(){return _responseCodes;};
 	void                setResponseCode(int code){_responseCodes = static_cast<responseCodeStates>(code);}
@@ -265,9 +209,6 @@ public:
 		_responseSize = size;
 		_response = resp;
 	};
-	void                setMethodIsAllowed(bool methodIsAllowed){_methodIsAllowed = methodIsAllowed;}
-	bool                isRequestIsValid() const{return _requestIsValid;}
-	void                setRequestIsValid(bool requestIsValid){_requestIsValid = requestIsValid;}
 	void                setBytesSent(size_t bytes){_bytesSent = bytes;}
 	void                addBytesSent(size_t addBytes){_bytesSent += addBytes;}
 

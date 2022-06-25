@@ -19,11 +19,11 @@ void        Client::readRequest()
             line.erase(pos1,1);
         }
         std::cout << "line " << line <<  "\n";
-            parseRequest(line);
-            analyseRequest(line);
-//            std::cout << "buf_before: |" << _request.getBuffer() << "| \n";
-            _request.setBuffer(_request.getBuffer().substr(pos + 1, _request.getBuffer().size() - pos));
-//            std::cout << "buf_after: |" << _request.getBuffer() << "| \n";
+        parseRequest(line);
+        analyseRequest(line);
+            std::cout << "buf_before: |" << _request.getBuffer() << "| \n";
+        _request.setBuffer(_request.getBuffer().substr(pos + 1, _request.getBuffer().size() - pos));
+            std::cout << "buf_after: |" << _request.getBuffer() << "| \n";
         }
     }
 }

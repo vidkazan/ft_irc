@@ -14,14 +14,11 @@ enum RequestMethod{
     LIST,
     NAMES,
     PART,
-};
-
-enum RequestErrors {
-	NO_ERROR,
-	ERROR_REQUEST_NOT_VALID,
-	ERROR_METHOD_NOT_ALLOWED,
-	ERROR_PATH_NOT_AVAILABLE,
-	ERROR_BODY_OVER_MAX_SIZE,
+    TOPIC,
+    NOTICE,
+    INVITE,
+    MODE,
+    KICK,
 };
 
 class Request{
@@ -30,19 +27,15 @@ private:
 	short                           _id;
 	std::string                     _type;
 	std::string                     _buffer;
-	ssize_t                         _maxBodySize;
 	size_t                          _count;
 	RequestMethod	                _requestMethod;
-	RequestErrors	                _requestErrors;
     size_t                          _bytesReceieved;
 public:
 	Request():	_id(0), \
 				_type(""),\
 				_buffer(""),\
-				_maxBodySize(-1), \
 				_count(0), \
 				_requestMethod(NO_METHOD), \
-				_requestErrors(NO_ERROR), \
                 _bytesReceieved(0)
 	{
 		while(_id < 1){
@@ -51,9 +44,7 @@ public:
 	};
 	virtual                         ~Request(){}
 	RequestMethod                   &getRequestMethod(){return _requestMethod;};
-	RequestErrors                   &getRequestErrors(){return _requestErrors;};
 	void	                        setRequestMethod(int m){_requestMethod = static_cast<RequestMethod>(m);}
-	void	                        setRequestErrors(int m){_requestErrors = static_cast<RequestErrors>(m);}
 	short                           getRequestId(){return _id;};
 	const std::string               &getBuffer() const {return _buffer;};
 	std::string                     getType() const {return  _type;};
@@ -73,7 +64,5 @@ public:
         if(n>0)
         _bytesReceieved += n;
     }
-	ssize_t                         getMaxBodySize() const{return _maxBodySize;}
-	void                            setMaxBodySize(ssize_t size){_maxBodySize = size;}
 	void                            setCounter(size_t count){_count = count;}
 };

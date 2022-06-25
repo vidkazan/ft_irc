@@ -22,6 +22,18 @@
 #define WRITING 1
 #define CLOSING 2
 
+typedef struct s_chan_modes {
+    bool o;
+    bool i;
+    bool t;
+    bool b;
+} t_chan_modes;
+
+typedef struct s_user_modes {
+    bool o;
+    bool b;
+} t_user_modes;
+
 #include "irc/Request.hpp"
 #include "irc/Response.hpp"
 #include "irc/Client.hpp"

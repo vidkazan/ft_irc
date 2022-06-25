@@ -98,9 +98,23 @@ void        Client::generateResponse()
                 _msgStarMsg = false;
                 break;
             }
-            case CODE_NOT_SET: {
-                return;
+            case ERR_UNKNOWNCOMMAND: {
+                bufResp += ":ft_irc 421 :Unknown command\n";
+                break;
             }
+            case ERR_USERNOTINCHANNEL: {
+                bufResp += ":ft_irc 441 "+_attrs[0]+" "+_attrs[1]+" :They aren't on that channel\n";
+                break;
+            }
+            case ERR_YOUREBANNEDCREEP:
+            case ERR_INVITEONLYCHAN:
+            case ERR_FILEERROR:
+            case ERR_CHANOPRIVSNEEDED: {
+                bufResp += ":ft_irc 482 "+_attrs[0]+ " :You're not channel operator\n";
+                break;
+            }
+            case CODE_NOT_SET:
+                return;
         }
     }
     allocateResponse(bufResp);
