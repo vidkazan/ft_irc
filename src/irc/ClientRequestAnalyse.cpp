@@ -24,6 +24,52 @@ void        Client::analyseRequest(std::string line)
     std::cout << "line erased:|" << line << "|\n";
     switch (_request.getRequestMethod()) {
         case TOPIC: {
+            bool setTopic =0;
+            size_t pos;
+            std::string chan;
+            std::string topic = "";
+            if (!_isAuthorisedNickUser) {
+                _response.setResponseCode(ERR_NOTREGISTERED);
+            } else {
+                pos = line.find(":");
+                if (pos != std::string::npos) {
+                    setTopic = 1;
+                    chan = line.substr(0,pos - 1);
+                    if (line.size() - pos > 1)
+                        topic = line.substr(pos + 1, line.size() - pos - 1);
+                } else {
+                    chan = line;
+                }
+                std::cout << "TOPIC: |"<<chan<<"|"<<topic<<"|\n";
+                if(chan.empty()) {
+                    _response.setResponseCode(ERR_NEEDMOREPARAMS);
+                    _attrs.push_back("TOPIC");
+                } else if (!_irc->findChanByName(chan)) {
+                    _response.setResponseCode(ERR_NOSUCHCHANNEL);
+                    _attrs.push_back(chan);
+                } else if (_irc->findChanByName(chan)->checkChanClientBanned(_nickname)){
+                    _response.setResponseCode(ERR_YOUREBANNEDCREEP);
+                } else if (!_irc->findChanByName(chan)->findClient(_nickname)){
+                    _response.setResponseCode(ERR_NOTONCHANNEL);
+                    _attrs.push_back(chan);
+                } else {
+                    std::string rpl;
+                    if(setTopic) {
+                        _irc->findChanByName(chan)->setTopic(topic);
+                        rpl = ":"+_nickname+" TOPIC "+chan+" :"+topic+"\n";
+                    } else {
+                        topic = _irc->findChanByName(chan)->getTopic();
+                        if(topic.empty()) {
+                            rpl = ":"+_irc->getServerName()+" 331 "+_nickname+" "+chan+" :No topic is set.\n";
+                        } else {
+                            rpl = ":"+_irc->getServerName()+" 332 "+_nickname+" "+chan+" :"+topic+"\n";
+                        }
+                    }
+                    allocateResponse(rpl);
+                    return;
+                }
+            }
+            generateResponse();
             break;
         }
         case NO_METHOD: {
@@ -85,6 +131,9 @@ void        Client::analyseRequest(std::string line)
             break;
         }
         case USER: {
+//            if(_isAuthorisedNickUser) {
+//                _response.setResponseCode(REGISTERED);
+//                generateResponse();
             break;
         }
         case NOTICE:
@@ -104,11 +153,13 @@ void        Client::analyseRequest(std::string line)
                     msg = ":" + _nickname + " PRIVMSG " + receiverName + " " +
                           line.substr(pos, _request.getBuffer().size() - pos);
 //                    std::cout << "analyse: PRIVMSG: msg " << msg << "\n";
-                    msg.append("\n");
+                    msg.append("\r\n");
                     if (receiverName[0] == '#' || receiverName[0] == '&') {
                         if (_irc->findChanByName(receiverName) == nullptr) {
                             _response.setResponseCode(ERR_NOSUCHCHANNEL);
                             _attrs.push_back(receiverName);
+                        } else if (_irc->findChanByName(receiverName)->checkChanClientBanned(_nickname)){
+                            _response.setResponseCode(ERR_YOUREBANNEDCREEP);
                         } else if (!_irc->findChanByName(receiverName)->findClient(_nickname)) {
                             _response.setResponseCode(ERR_CANNOTSENDTOCHAN);
                             _attrs.push_back(receiverName);
@@ -134,11 +185,50 @@ void        Client::analyseRequest(std::string line)
             break;
         }
         case INVITE: {
+            size_t pos;
+            std::string client;
+            std::string chan;
+            std::string buf;
             if (!_isAuthorisedNickUser) {
                 _response.setResponseCode(ERR_NOTREGISTERED);
             } else if (line.empty()) {
                 _response.setResponseCode(ERR_NEEDMOREPARAMS);
+            } else {
+                pos = line.find(' ');
+                if (pos!=std::string::npos) {
+                    client = line.substr(0,pos);
+                    if(line.size() - pos > 1)
+                        chan = line.substr(pos+1, line.size()- pos - 1);
+                }
+                if(chan.empty() || client.empty()) {
+                    _response.setResponseCode(ERR_NEEDMOREPARAMS);
+                } else if(!_irc->findChanByName(chan)) {
+                    _response.setResponseCode(ERR_NOSUCHCHANNEL);
+                    _attrs.push_back(chan);
+                } else if (_irc->findChanByName(chan)->checkChanClientBanned(_nickname)){
+                    _response.setResponseCode(ERR_YOUREBANNEDCREEP);
+                } else if(!_irc->findChanByName(chan)->findOperator(_nickname)) {
+                    _response.setResponseCode(ERR_CHANOPRIVSNEEDED);
+                    _attrs.push_back(chan);
+                } else if(!_irc->findClientByNickName(client)) {
+                    _response.setResponseCode(ERR_NOSUCHNICK);
+                    _attrs.push_back(client);
+                } else if (_irc->findChanByName(chan) && _irc->findChanByName(chan)->checkChanClientBanned(client)){
+                    _response.setResponseCode(ERR_HEISBANNEDCREEP);
+                } else if(_irc->findChanByName(chan)->findClient(client)) {
+                    _response.setResponseCode(ERR_USERONCHANNEL);
+                    _attrs.push_back(client);
+                    _attrs.push_back(chan);
+                } else {
+                    _irc->findChanByName(chan)->addClientInvite(client);
+                    buf = ":" + _nickname + " INVITE :" + client + " :" + chan +"\n";
+                    _irc->findClientByNickName(client)->allocateResponse(buf);
+                    buf = ":"+_irc->getServerName()+" NOTICE @" +chan+" :"+_nickname+" invited "+client+" into channel "+chan+"\n";
+                    allocateResponse(buf);
+                    return;
+                }
             }
+            generateResponse();
             break;
         }
         case JOIN: {
@@ -146,6 +236,11 @@ void        Client::analyseRequest(std::string line)
                 _response.setResponseCode(ERR_NOTREGISTERED);
             } else if (line.empty()) {
                 _response.setResponseCode(ERR_NEEDMOREPARAMS);
+            } else if (_irc->findChanByName(line) && _irc->findChanByName(line)->checkChanClientBanned(_nickname)){
+                _response.setResponseCode(ERR_YOUREBANNEDCREEP);
+            } else if (_irc->findChanByName(line) && _irc->findChanByName(line)->isInviteOnly() && !_irc->findChanByName(line)->isInvitedClient(_nickname)) {
+                _response.setResponseCode(ERR_INVITEONLYCHAN);
+                _attrs.push_back(line);
             } else {
                 if (line[0] == ':')
                     line.erase(line.begin());
@@ -223,6 +318,8 @@ void        Client::analyseRequest(std::string line)
                 } else if(!_irc->findChanByName(chan)) {
                     _response.setResponseCode(ERR_NOSUCHCHANNEL);
                     _attrs.push_back(chan);
+                } else if (_irc->findChanByName(chan) && _irc->findChanByName(chan)->checkChanClientBanned(_nickname)){
+                    _response.setResponseCode(ERR_YOUREBANNEDCREEP);
                 } else if(!_irc->findChanByName(chan)->findOperator(_nickname)) {
                     _response.setResponseCode(ERR_CHANOPRIVSNEEDED);
                     _attrs.push_back(chan);
@@ -231,8 +328,10 @@ void        Client::analyseRequest(std::string line)
                     _attrs.push_back(client);
                     _attrs.push_back(chan);
                 } else {
-//                    :pepe11!~1@89.232.114.120 KICK #pepe pepe22 :pepe11
-                    buf = ":" + _nickname + " KICK " + chan + " " + client + " :"+_nickname + "\n";
+                    if(msg.empty())
+                        buf = ":" + _nickname + " KICK " + chan + " " + client + " :"+msg +"\n";
+                    else
+                        buf = ":" + _nickname + " KICK " + chan + " " + client + " :"+_nickname+"\n";
                     _irc->findChanByName(chan)->setMsgToAllClients(buf, _irc);
                     _irc->findChanByName(chan)->removeClient(client);
                     return;
@@ -259,19 +358,80 @@ void        Client::analyseRequest(std::string line)
                 _response.setResponseCode(ERR_NOTONCHANNEL);
                 _attrs.push_back(line);
             } else {
+//                :P11!~1@89.232.114.120 PART #pp
                 std::string msg = ":" + _nickname + " PART :" + line + "\n";
-                _irc->findChanByName(line)->setMsgToAllClients(_nickname,msg, _irc);
+                _irc->findChanByName(line)->setMsgToAllClients(msg, _irc);
                 _irc->findChanByName(line)->removeClient(_nickname);
                 break;
             }
             generateResponse();
             break;
         }
-        case MODE: {
+        case MODE: { // TODO messages check
+            char modeChar = 0;
+            int modeSign = -1;
+            size_t pos1;
+            size_t pos2;
+            std::string chan;
+            std::string flags;
+            std::string client;
             if (!_isAuthorisedNickUser) {
                 _response.setResponseCode(ERR_NOTREGISTERED);
             } else if (line.empty()) {
                 _response.setResponseCode(ERR_NEEDMOREPARAMS);
+            } else {
+//                <channel> {[+|-]|i|t|b} [<user>]
+                pos1 = line.find_first_of(" ");
+                pos2 = line.find_last_of(" ");
+                if(pos1!=std::string::npos) {
+                    chan = line.substr(0,pos1);
+                    if(pos2!=std::string::npos && pos1 != pos2) {
+                        client = line.substr(pos2+1, line.size()-pos2-1);
+                        flags= line.substr(pos1+1, pos2-pos1-1);
+                    } else {
+                        flags= line.substr(pos1+1, line.size()-pos1-1);
+                    }
+                    if(flags[0]=='+')
+                        modeSign = 1;
+                    else if(flags[0]=='-')
+                        modeSign = 0;
+                    else
+                        modeSign = -1;
+                    modeChar = flags[1];
+                }
+                std::cout << "MODE: |"<<chan<<"|"<<flags<<"|"<<client<<"|\n";
+                if(chan.empty() || flags.empty() || (client.empty() && (flags=="+b" || flags=="-b"))) {
+                    _response.setResponseCode(ERR_NEEDMOREPARAMS);
+                } else if(!_irc->findChanByName(chan)) {
+                    _response.setResponseCode(ERR_NOSUCHCHANNEL);
+                    _attrs.push_back(chan);
+                } else if (_irc->findChanByName(chan) && _irc->findChanByName(chan)->checkChanClientBanned(_nickname)){
+                    _response.setResponseCode(ERR_YOUREBANNEDCREEP);
+                } else if(!_irc->findChanByName(chan)->findOperator(_nickname)) {
+                    _response.setResponseCode(ERR_CHANOPRIVSNEEDED);
+                    _attrs.push_back(chan);
+                } else if(!client.empty() &&!_irc->findChanByName(chan)->findClient(client) && flags=="+b") {
+                    _response.setResponseCode(ERR_USERNOTINCHANNEL);
+                    _attrs.push_back(client);
+                    _attrs.push_back(chan);
+                } else if(modeChar!='i' && modeChar!='b' && modeChar!='t' || modeSign<0 || flags.size() != 2){
+                    _response.setResponseCode(ERR_UNKNOWNMODE);
+                    _attrs.push_back(flags);
+                } else {
+                    if(modeChar == 'i' || modeChar == 't')
+                        _irc->findChanByName(chan)->setChanInviteMode(modeChar, modeSign);
+                    else {
+                        if (flags == "+b") {
+                            _irc->findChanByName(chan)->addClientBan(client);
+                            _irc->findChanByName(chan)->removeClient(client);
+                        }
+                        if (flags == "-b") {
+                            _irc->findChanByName(chan)->deleteClientBan(client);
+                        }
+                    }
+                    std::cout << "MODE: success\n";
+                    return;
+                }
             }
             generateResponse();
             break;

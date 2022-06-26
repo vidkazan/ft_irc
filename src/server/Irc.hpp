@@ -40,7 +40,7 @@ public:
                 return(&(*it));
             }
         }
-        std::cout << "findChanByNickName: not found\n";
+        std::cout << "findChanByName: not found\n";
         return(nullptr);
     }
 	void                        configFileParse(){}

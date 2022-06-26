@@ -40,79 +40,101 @@ void        Client::generateResponse()
 //    "_msgStarMsg " << _msgStarMsg << "\n";
     std::string bufResp;
     if(_msgUnAuthorisedMsg){
-        bufResp += ":ft_irc NOTICE AUTH : PASS is requred\n";
+        bufResp += ":localhost NOTICE AUTH : PASS is requred\n";
         _msgUnAuthorisedMsg = false;
+        return;
     }
     else {
         switch (_response.getResponseCodes()) {
             case ERR_NORECIPIENT: {
-                bufResp += ":ft_irc 411 : No recipient given (" + _request.getType() + ")\n";
+                bufResp += ":localhost 411 : No recipient given (" + _request.getType() + ")\n";
                 break;
             }
             case ERR_CANNOTSENDTOCHAN: {
-                bufResp += ":ft_irc 404 "+_attrs[0]+" :Cannot send to channel\n";
+                bufResp += ":localhost 404 "+_attrs[0]+" :Cannot send to channel\n";
                 break;
             }
             case ERR_NOSUCHNICK: {
-                bufResp += ":ft_irc 401 "+_attrs[0]+" :No such nick\n";
+                bufResp += ":localhost 401 "+_attrs[0]+" :No such nick\n";
                 break;
             }
             case ERR_NOSUCHCHANNEL: {
-                bufResp += ":ft_irc 403 "+_attrs[0]+" :No such channel\n";
+                bufResp += ":localhost 403 "+_attrs[0]+" :No such channel\n";
                 break;
             }
             case ERR_NOTEXTTOSEND: {
-                bufResp += ":ft_irc 412 : No text to send\n";
+                bufResp += ":localhost 412 : No text to send\n";
                 break;
             }
             case ERR_NEEDMOREPARAMS: {
-                bufResp += ":ft_irc 461 "+_request.getType()+" :Not enough parameters\n";
+                bufResp += ":localhost 461 "+_request.getType()+" :Not enough parameters\n";
                 break;
             }
             case ERR_NICKNAMEINUSE: {
-                bufResp += ":ft_irc 432 "+_attrs[0]+" :Nickname is already in use\n";
+                bufResp += ":localhost 432 "+_attrs[0]+" :Nickname is already in use\n";
                 break;
             }
             case ERR_NOTREGISTERED: {
-                bufResp += ":ft_irc 451 : You have not registered\n";
+                bufResp += ":localhost 451 : You have not registered\n";
                 break;
             }
             case ERR_NONICKNAMEGIVEN: {
-                bufResp += ":ft_irc 431 : No nickname given\n";
+                bufResp += ":localhost 431 : No nickname given\n";
                 break;
             }
             case ERR_PASSWDMISMATCH: {
-                bufResp += ":ft_irc 464 : Password incorrect\n";
+                bufResp += ":localhost 464 : Password incorrect\n";
                 break;
             }
             case ERR_ALREADYREGISTRED: {
-                bufResp += ":ft_irc 462 : You may not register\n";
+                bufResp += ":localhost 462 : You may not register\n";
                 break;
             }
             case ERR_NOTONCHANNEL: {
-                bufResp += ":ft_irc 442 "+_attrs[0]+" : You're not on that channel\n";
+                bufResp += ":localhost 442 "+_attrs[0]+" : You're not on that channel\n";
                 break;
             }
             case REGISTERED: {
-                bufResp += ":ft_irc 001 " + _nickname + " :Welcomeeeeeeee!\n";
+//                bufResp += ":localhost 375 "+_nickname+" :- ft_irc Message of the Day -\n";
+//                bufResp += ":localhost 372 " + _nickname + " :Welcomeeeeeeee!\n";
+//                bufResp += ":localhost 376 "+_nickname+" :End of /MOTD command.\n";
+                bufResp +=":lion.tx.us.dal.net 001 polop :Welcome to the DALnet IRC Network polop!~111@188.162.39.107\n";
                 _msgStarMsg = false;
                 break;
             }
             case ERR_UNKNOWNCOMMAND: {
-                bufResp += ":ft_irc 421 :Unknown command\n";
+                bufResp += ":localhost 421 :Unknown command\n";
                 break;
             }
             case ERR_USERNOTINCHANNEL: {
-                bufResp += ":ft_irc 441 "+_attrs[0]+" "+_attrs[1]+" :They aren't on that channel\n";
+                bufResp += ":localhost 441 "+_attrs[0]+" "+_attrs[1]+" :They aren't on that channel\n";
                 break;
             }
-            case ERR_YOUREBANNEDCREEP:
-            case ERR_INVITEONLYCHAN:
-            case ERR_FILEERROR:
+            case ERR_USERONCHANNEL: {
+                bufResp += ":localhost 443 "+_attrs[0]+" "+_attrs[1]+" :is already on channel\n";
+                break;
+            }
+            case ERR_INVITEONLYCHAN: {
+                bufResp += ":localhost 473 "+_attrs[0]+ " :Cannot join channel (+i)\n";
+                break;
+            }
             case ERR_CHANOPRIVSNEEDED: {
-                bufResp += ":ft_irc 482 "+_attrs[0]+ " :You're not channel operator\n";
+                bufResp += ":localhost 482 "+_attrs[0]+ " :You're not channel operator\n";
                 break;
             }
+            case ERR_UNKNOWNMODE: {
+                bufResp += ":localhost 472 "+_attrs[0]+ " :is unknown mode to me\n";
+                break;
+            }
+            case ERR_YOUREBANNEDCREEP: {
+                bufResp += ":localhost 465 :You are banned from this chan\n";
+                break;
+            }
+            case ERR_HEISBANNEDCREEP: {
+                bufResp += ":localhost 465b :He is banned from this chan\n";
+                break;
+            }
+            case ERR_FILEERROR:
             case CODE_NOT_SET:
                 return;
         }
@@ -165,12 +187,12 @@ void        Client::sendResponse()
             return;
         }
         _response.addBytesSent(ret);
-//        std::cout << "send " << _socketFD << ": " << " sent " << _response.getBytesSent() << " respSize "
-//                  << _response.getResponseSize() << "  \n";
+        std::cout << "send " << _socketFD << ": " << " sent " << _response.getBytesSent() << " respSize "
+                  << _response.getResponseSize() << "  \n";
     }
     if(_response.getBytesSent() == (size_t)_response.getResponseSize())
     {
-//        std::cout << "send " << _socketFD << ": " << "set to READING" <<  "  \n";
+        std::cout << "send " << _socketFD << ": " << "set to READING" <<  "  \n";
         setStatus(READING);
         free(_response.getResponse());
         Response response;

@@ -31,7 +31,6 @@ typedef struct s_chan_modes {
 
 typedef struct s_user_modes {
     bool o;
-    bool b;
 } t_user_modes;
 
 #include "irc/Request.hpp"

@@ -133,6 +133,14 @@ enum responseCodeStates{
 //    channel.
     ERR_CHANOPRIVSNEEDED = 482,
 
+//    "<channel> :Cannot join channel (+i)"
+    ERR_INVITEONLYCHAN = 473,
+
+//    "<channel> :Channel key already set
+//    ERR_KEYSET = 467,
+
+//    "<char> :is unknown mode char to me"
+    ERR_UNKNOWNMODE = 472,
 
     // PASS
 //    ERR_NEEDMOREPARAMS , +
@@ -147,7 +155,7 @@ enum responseCodeStates{
 
     // JOIN
 //    ERR_NEEDMOREPARAMS, +
-    ERR_INVITEONLYCHAN = 473,
+//    ERR_INVITEONLYCHAN , +
 //    ERR_CHANNELISFULL,
 //    ERR_NOSUCHCHANNEL,+
 //    ERR_BANNEDFROMCHAN,
@@ -159,12 +167,17 @@ enum responseCodeStates{
 //    ERR_NOSUCHCHANNEL,+
 
     // MODE
+//    ERR_NEEDMOREPARAMS +
+//    ERR_NOSUCHCHANNEL +
+//    ERR_CHANOPRIVSNEEDED +
+//    ERR_USERNOTONCHANNEL +
+//    ERR_UNKNOWNMODE +
 
     // TOPIC
-//    ERR_NEEDMOREPARAMS,
+//    ERR_NEEDMOREPARAMS, +
 //    RPL_NOTOPIC,
-//    ERR_CHANOPRIVSNEEDED,
-//    ERR_NOTONCHANNEL,
+//    ERR_CHANOPRIVSNEEDED,+
+//    ERR_NOTONCHANNEL, +
 
 //     LIST
 //    ERR_NOSUCHSERVER+
@@ -180,10 +193,22 @@ enum responseCodeStates{
 //    ERR_NEEDMOREPARAMS +
 //    ERR_NOTONCHANNEL +
 //    ERR_NOSUCHCHANNEL +
-//    ERR_CHANOPRIVSNEEDED
+//    ERR_CHANOPRIVSNEEDED+
+
+    // INVITE
+//    ERR_NEEDMOREPARAMS +
+//    ERR_NOSUCHANNEL +
+//    ERR_CHANOPRIVSNEEDED +
+//    ERR_NOSUCHNICK +
+
+//    "<user> <channel> :is already on channel"
+//    - Returned when a client tries to invite a user to a
+//    channel they are already on.
+    ERR_USERONCHANNEL = 443,
 
     REGISTERED = 1,
     CODE_NOT_SET = 0,
+    ERR_HEISBANNEDCREEP = 666,
 };
 
 class Response{

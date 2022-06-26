@@ -3,6 +3,15 @@
 //
 
 #include "../main.hpp"
+void        printAsInt(std::string str)
+{
+            std::cout << "|";
+            for(int i=0;i<str.size();i++)
+            {
+                std::cout << +str[i] << " ";
+            }
+        std::cout << "|";
+}
 
 void        Client::readRequest()
 {
@@ -21,9 +30,14 @@ void        Client::readRequest()
         std::cout << "line " << line <<  "\n";
         parseRequest(line);
         analyseRequest(line);
-            std::cout << "buf_before: |" << _request.getBuffer() << "| \n";
+
+            std::cout << "buf_before: |";
+            std::cout << _request.getBuffer();
+            std::cout << "| \n";
         _request.setBuffer(_request.getBuffer().substr(pos + 1, _request.getBuffer().size() - pos));
-            std::cout << "buf_after: |" << _request.getBuffer() << "| \n";
+            std::cout << "buf_after: |";
+            std::cout << _request.getBuffer();
+            std::cout << "|\n";
         }
     }
 }
