@@ -24,7 +24,7 @@ void        Client::analyseRequest(std::string line)
     std::cout << "line erased:|" << line << "|\n";
     switch (_request.getRequestMethod()) {
         case TOPIC: {
-            bool setTopic =0;
+            bool setTopic = 0;
             size_t pos;
             std::string chan;
             std::string topic = "";
@@ -34,13 +34,13 @@ void        Client::analyseRequest(std::string line)
                 pos = line.find(":");
                 if (pos != std::string::npos) {
                     setTopic = 1;
-                    chan = line.substr(0,pos - 1);
+                    chan = line.substr(0, pos - 1);
                     if (line.size() - pos > 1)
                         topic = line.substr(pos + 1, line.size() - pos - 1);
                 } else {
                     chan = line;
                 }
-                std::cout << "TOPIC: |"<<chan<<"|"<<topic<<"|\n";
+                std::cout << "TOPIC: |" << chan << "|" << topic << "|\n";
                 if(chan.empty()) {
                     _response.setResponseCode(ERR_NEEDMOREPARAMS);
                     _attrs.push_back("TOPIC");
@@ -53,24 +53,12 @@ void        Client::analyseRequest(std::string line)
                     _response.setResponseCode(ERR_NOTONCHANNEL);
                     _attrs.push_back(chan);
                 } else {
-                    std::string rpl;
-                    if(setTopic) {
-                        _irc->findChanByName(chan)->setTopic(topic);
-                        rpl = ":"+_nickname+" TOPIC "+chan+" :"+topic+"\n";
-                    } else {
-                        topic = _irc->findChanByName(chan)->getTopic();
-                        if(topic.empty()) {
-                            rpl = ":"+_irc->getServerName()+" 331 "+_nickname+" "+chan+" :No topic is set.\n";
-                        } else {
-                            rpl = ":"+_irc->getServerName()+" 332 "+_nickname+" "+chan+" :"+topic+"\n";
-                        }
-                    }
-                    allocateResponse(rpl);
+                    handleTopic(chan,topic,setTopic);
                     return;
                 }
+                generateResponse();
+                break;
             }
-            generateResponse();
-            break;
         }
         case NO_METHOD: {
             _response.setResponseCode(CODE_NOT_SET);
@@ -124,16 +112,59 @@ void        Client::analyseRequest(std::string line)
             } else {
                 std::cout << "NICKNAME is SET: " << line << " \n";
                 _nickname = line;
-                _isAuthorisedNickUser = true;
-                _response.setResponseCode(REGISTERED);
+                if(!_nickname.empty() && !_username.empty() && !_hostname.empty() && !_servername.empty() && !_realname.empty()) {
+                    _isAuthorisedNickUser = true;
+                    _response.setResponseCode(REGISTERED);
+                } else {
+                    return;
+                }
             }
             generateResponse();
             break;
         }
         case USER: {
-//            if(_isAuthorisedNickUser) {
-//                _response.setResponseCode(REGISTERED);
-//                generateResponse();
+            size_t pos;
+            std::string us,ho,se,re;
+            if (_isAuthorisedNickUser) {
+                std::cout << _socketFD << "NICK ERR_ALREADYREGISTRED \n";
+                _response.setResponseCode(ERR_ALREADYREGISTRED);
+            } else if (!_isAuthorisedPass) {
+                std::cout << _socketFD << "NICK ERR_NOTREGISTERED \n";
+                _response.setResponseCode(ERR_NOTREGISTERED);
+            } else {
+                pos = line.find(' ');
+                if(pos!= std::string::npos){
+                    us = line.substr(0,pos);
+                    line.erase(0,pos + 1);
+                }
+                pos = line.find(' ');
+                if(pos!= std::string::npos){
+                    ho = line.substr(0,pos);
+                    line.erase(0,pos+1);
+                }
+                pos = line.find(' ');
+                if(pos!= std::string::npos){
+                    se = line.substr(0,pos);
+                    line.erase(0,pos+1);
+                }
+                re = line;
+                if (us.empty() || ho.empty() || se.empty() || re.empty()) {
+                    std::cout << _socketFD << "NICK ERR_NEEDMOREPARAMS \n";
+                    _response.setResponseCode(ERR_NEEDMOREPARAMS);
+                } else {
+                    _username = us;
+                    _hostname = ho;
+                    _servername = se;
+                    _realname = re;
+                    if(!_nickname.empty() && !_username.empty() && !_hostname.empty() && !_servername.empty() && !_realname.empty()) {
+                        _isAuthorisedNickUser = true;
+                        _response.setResponseCode(REGISTERED);
+                    } else {
+                        return;
+                    }
+                }
+            }
+            generateResponse();
             break;
         }
         case NOTICE:
@@ -214,7 +245,7 @@ void        Client::analyseRequest(std::string line)
                     _response.setResponseCode(ERR_NOSUCHNICK);
                     _attrs.push_back(client);
                 } else if (_irc->findChanByName(chan) && _irc->findChanByName(chan)->checkChanClientBanned(client)){
-                    _response.setResponseCode(ERR_HEISBANNEDCREEP);
+                    _response.setResponseCode(ERR_CANNOTSENDTOCHAN);
                 } else if(_irc->findChanByName(chan)->findClient(client)) {
                     _response.setResponseCode(ERR_USERONCHANNEL);
                     _attrs.push_back(client);
@@ -247,9 +278,10 @@ void        Client::analyseRequest(std::string line)
                 if (line[0] != '#' && line[0] != '&')
                     line.insert(line.begin(), '#');
                 if(_irc->addChannel(line, _nickname)) {
-                    std::string msg = ":" + _nickname + " JOIN :" + line + "\n";
-                    generateNamesRPL(line);
+                    std::string msg = ":" + _nickname+"!"+_username+"@"+_irc->getPortServer().getIp() + " JOIN " + line + "\n";
                     _irc->findChanByName(line)->setMsgToAllClients(msg, _irc);
+                    handleTopic(line,"",0);
+                    generateNamesRPL(line);
                 } else {
 //                    std::cout << "join: joined already\n";
                 }
@@ -260,7 +292,7 @@ void        Client::analyseRequest(std::string line)
         }
         case PING: {
             std::string msg;
-            msg.append(":" + _irc->getServerName() + " PONG " + ":" + _irc->getServerName() + ":" + line + "\n");
+            msg.append(":" + _irc->getServerName() + " PONG " + ":" + _irc->getServerName() + " " + line + "\n");
             allocateResponse(msg);
             break;
         }
@@ -400,7 +432,7 @@ void        Client::analyseRequest(std::string line)
                     modeChar = flags[1];
                 }
                 std::cout << "MODE: |"<<chan<<"|"<<flags<<"|"<<client<<"|\n";
-                if(chan.empty() || flags.empty() || (client.empty() && (flags=="+b" || flags=="-b"))) {
+                if(chan.empty() || flags.empty()) {
                     _response.setResponseCode(ERR_NEEDMOREPARAMS);
                 } else if(!_irc->findChanByName(chan)) {
                     _response.setResponseCode(ERR_NOSUCHCHANNEL);
@@ -410,7 +442,7 @@ void        Client::analyseRequest(std::string line)
                 } else if(!_irc->findChanByName(chan)->findOperator(_nickname)) {
                     _response.setResponseCode(ERR_CHANOPRIVSNEEDED);
                     _attrs.push_back(chan);
-                } else if(!client.empty() &&!_irc->findChanByName(chan)->findClient(client) && flags=="+b") {
+                } else if(!client.empty() &&!_irc->findChanByName(chan)->findClient(client)) {
                     _response.setResponseCode(ERR_USERNOTINCHANNEL);
                     _attrs.push_back(client);
                     _attrs.push_back(chan);
@@ -418,7 +450,7 @@ void        Client::analyseRequest(std::string line)
                     _response.setResponseCode(ERR_UNKNOWNMODE);
                     _attrs.push_back(flags);
                 } else {
-                    if(modeChar == 'i' || modeChar == 't')
+                    if(client.empty())
                         _irc->findChanByName(chan)->setChanInviteMode(modeChar, modeSign);
                     else {
                         if (flags == "+b") {
@@ -436,8 +468,13 @@ void        Client::analyseRequest(std::string line)
             generateResponse();
             break;
         }
+        case WHO: {
+//            :punch.wa.us.dal.net 352 pepenick #ch ~u 188.234.27.34 punch.wa.us.dal.net pepenick H@ :0 r
+            break;
+        }
     }
 }
+
 bool        Client::checkPassword(std::string p)
 {
     return(_irc->checkPassword(p));
@@ -447,7 +484,27 @@ void        Client::generateNamesRPL(std::string line)
 {
     std::string msg = ":" + _irc->getServerName() + " 353 " + _nickname + " = " +
                       _irc->findChanByName(line)->getChanNames();
-    msg += ":" + _irc->getServerName() + " 366 " + _nickname + " " + _irc->findChanByName(line)->getName() + \
-                " :End of /NAMES list.\n";
+    msg += ":" + _irc->getServerName() + " 366 " + _irc->findChanByName(line)->getName() + \
+                " :End of /NAMES list\n";
     allocateResponse(msg);
+}
+
+
+
+void        Client::handleTopic(std::string chan, std::string topic, bool setTopic)
+{
+    std::string rpl;
+    if(setTopic) {
+        _irc->findChanByName(chan)->setTopic(topic);
+        rpl = ":"+_nickname+" TOPIC "+chan+" :"+topic+"\n";
+    } else {
+        topic = _irc->findChanByName(chan)->getTopic();
+        if(topic.empty()) {
+            rpl = ":"+_irc->getServerName()+" 331 "+_nickname+" "+chan+" :No topic is set.\n";
+        } else {
+            rpl = ":"+_irc->getServerName()+" 332 "+_nickname+" "+chan+" :"+topic+"\n";
+        }
+    }
+    allocateResponse(rpl);
+    return;
 }

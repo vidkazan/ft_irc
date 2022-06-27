@@ -19,6 +19,7 @@ enum RequestMethod{
     INVITE,
     MODE,
     KICK,
+    WHO
 };
 
 class Request{

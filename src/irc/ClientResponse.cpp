@@ -95,10 +95,10 @@ void        Client::generateResponse()
                 break;
             }
             case REGISTERED: {
-//                bufResp += ":localhost 375 "+_nickname+" :- ft_irc Message of the Day -\n";
-//                bufResp += ":localhost 372 " + _nickname + " :Welcomeeeeeeee!\n";
-//                bufResp += ":localhost 376 "+_nickname+" :End of /MOTD command.\n";
-                bufResp +=":lion.tx.us.dal.net 001 polop :Welcome to the DALnet IRC Network polop!~111@188.162.39.107\n";
+                bufResp += ":localhost 001 "+_nickname+" :Welcome to the IRC server!\n";
+                bufResp += ":localhost 375 "+_nickname+" :- ft_irc Message of the Day -\n";
+                bufResp += ":localhost 372 "+_nickname+" :Welcomeeeeeeee!\n";
+                bufResp += ":localhost 376 "+_nickname+" :End of /MOTD command.\n";
                 _msgStarMsg = false;
                 break;
             }
@@ -123,15 +123,11 @@ void        Client::generateResponse()
                 break;
             }
             case ERR_UNKNOWNMODE: {
-                bufResp += ":localhost 472 "+_attrs[0]+ " :is unknown mode to me\n";
+                bufResp += ":localhost 472 "+_attrs[0]+ " :is unknown mode char to me\n";
                 break;
             }
             case ERR_YOUREBANNEDCREEP: {
                 bufResp += ":localhost 465 :You are banned from this chan\n";
-                break;
-            }
-            case ERR_HEISBANNEDCREEP: {
-                bufResp += ":localhost 465b :He is banned from this chan\n";
                 break;
             }
             case ERR_FILEERROR:
@@ -174,10 +170,10 @@ void        Client::sendResponse()
         size = 999999999;
     if(_response.getResponseSize()) {
         std::string tmp(_response.getResponse(), _response.getResponseSize());
-        std::cout << "send: " << getSocketFd() << "msg: " << tmp << "\n";
+        std::cout << _socketFD << " send:|" << tmp << "|\n";
         ret = send(_socketFD, _response.getResponse() + _response.getBytesSent(), size, 0x80000); //  SIGPIPE ignore
         if (ret <= 0) {
-            std::cout << "send " << _socketFD << ": " << "set to CLOSING" << "  \n";
+//            std::cout << "send " << _socketFD << ": " << "set to CLOSING" << "  \n";
             free(_response.getResponse());
             Response response;
             setResponse(response);
@@ -187,12 +183,12 @@ void        Client::sendResponse()
             return;
         }
         _response.addBytesSent(ret);
-        std::cout << "send " << _socketFD << ": " << " sent " << _response.getBytesSent() << " respSize "
-                  << _response.getResponseSize() << "  \n";
+//        std::cout << _socketFD << " send: " << " sent " << _response.getBytesSent() << " respSize "
+//                  << _response.getResponseSize() << "  \n";
     }
     if(_response.getBytesSent() == (size_t)_response.getResponseSize())
     {
-        std::cout << "send " << _socketFD << ": " << "set to READING" <<  "  \n";
+//        std::cout << "send " << _socketFD << ": " << "set to READING" <<  "  \n";
         setStatus(READING);
         free(_response.getResponse());
         Response response;

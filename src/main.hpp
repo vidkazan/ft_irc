@@ -40,4 +40,5 @@ typedef struct s_user_modes {
 #include "server/PortServer.hpp"
 #include "server/Irc.hpp"
 
-void printLog(std::string description,std::string msg,std::string color);
+void        printLog(std::string description,std::string msg,std::string color);
+std::string stringToLower(std::string str);

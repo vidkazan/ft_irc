@@ -15,6 +15,8 @@ private:
     std::string                      _nickname;
     std::string                      _username;
     std::string                      _realname;
+    std::string                      _hostname;
+    std::string                      _servername;
 //                      Auth
     bool                             _isAuthorisedPass;
     bool                             _isAuthorisedNickUser;
@@ -108,6 +110,7 @@ public:
     void        analyseRequest(std::string);
     bool        checkPassword(std::string);
     void        generateNamesRPL(std::string);
+    void        handleTopic(std::string,std::string,bool);
 
 //              ClientResponse.cpp
 

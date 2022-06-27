@@ -76,7 +76,7 @@ public:
     int  getChanClientsCount(){return _clients.size();}
     std::string getChanNames() {
         std::string names;
-        names += _name+" : ";
+        names += _name+" :";
         for(std::vector<std::pair<std::string,t_user_modes> >::iterator it = _clients.begin();it != _clients.end(); it++){
             if(it->second.o)
                 names+="@";
@@ -129,6 +129,8 @@ public:
             _chanModes.i = sign;
         if(mode == 't' && ( sign == 0 || sign == 1))
             _chanModes.t = sign;
+        if(mode == 'b' && ( sign == 0 || sign == 1))
+            _chanModes.b = sign;
     }
     bool checkChanClientBanned(std::string client){
         for(std::vector<std::string>::iterator it = _bannedClients.begin();it!=_bannedClients.end();it++) {

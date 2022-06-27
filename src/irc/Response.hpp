@@ -142,65 +142,6 @@ enum responseCodeStates{
 //    "<char> :is unknown mode char to me"
     ERR_UNKNOWNMODE = 472,
 
-    // PASS
-//    ERR_NEEDMOREPARAMS , +
-//    ERR_ALREADYREGISTRED, +
-//    ERR_PASSWDMISMATCH, +
-
-    // NICK
-//    ERR_NONICKNAMEGIVEN, +
-//    ERR_NICKNAMEINUSE, +
-//    ERR_ERRONEUSNICKNAME, +
-//    ERR_NICKCOLLISION, +
-
-    // JOIN
-//    ERR_NEEDMOREPARAMS, +
-//    ERR_INVITEONLYCHAN , +
-//    ERR_CHANNELISFULL,
-//    ERR_NOSUCHCHANNEL,+
-//    ERR_BANNEDFROMCHAN,
-//    ERR_BADCHANNELKEY,
-//    ERR_TOOMANYCHANNELS,
-
-    // PART
-//    ERR_NOTONCHANNEL,+
-//    ERR_NOSUCHCHANNEL,+
-
-    // MODE
-//    ERR_NEEDMOREPARAMS +
-//    ERR_NOSUCHCHANNEL +
-//    ERR_CHANOPRIVSNEEDED +
-//    ERR_USERNOTONCHANNEL +
-//    ERR_UNKNOWNMODE +
-
-    // TOPIC
-//    ERR_NEEDMOREPARAMS, +
-//    RPL_NOTOPIC,
-//    ERR_CHANOPRIVSNEEDED,+
-//    ERR_NOTONCHANNEL, +
-
-//     LIST
-//    ERR_NOSUCHSERVER+
-
-    // PRIVMSG
-//    ERR_NORECIPIENT, +
-//    ERR_CANNOTSENDTOCHAN, +
-//    ERR_NOSUCHNICK, +
-//    ERR_NOTEXTTOSEND, +
-//    ERR_TOOMANYTARGETS,
-
-    //KICK
-//    ERR_NEEDMOREPARAMS +
-//    ERR_NOTONCHANNEL +
-//    ERR_NOSUCHCHANNEL +
-//    ERR_CHANOPRIVSNEEDED+
-
-    // INVITE
-//    ERR_NEEDMOREPARAMS +
-//    ERR_NOSUCHANNEL +
-//    ERR_CHANOPRIVSNEEDED +
-//    ERR_NOSUCHNICK +
-
 //    "<user> <channel> :is already on channel"
 //    - Returned when a client tries to invite a user to a
 //    channel they are already on.
@@ -208,7 +149,6 @@ enum responseCodeStates{
 
     REGISTERED = 1,
     CODE_NOT_SET = 0,
-    ERR_HEISBANNEDCREEP = 666,
 };
 
 class Response{

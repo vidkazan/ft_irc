@@ -78,14 +78,14 @@ int     main(int argc, char ** argv)
             // finding a read event in client sockets array
             if (FD_ISSET(it->getSocketFd(), &readfds))
             {
-                std::cout << "read: " << it->getSocketFd() << "\n";
+//                std::cout << "read: " << it->getSocketFd() << "\n";
                 it->readRequest();
                 break;
             }
             // finding a write event in client sockets array
             else if(FD_ISSET(it->getSocketFd(), &writefds))
             {
-                std::cout << "write: " << it->getSocketFd() << "\n";
+//                std::cout << "write: " << it->getSocketFd() << "\n";
                 it->sendResponse();
                 break;
             }

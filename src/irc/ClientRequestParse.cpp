@@ -12,7 +12,7 @@ void        Client::parseRequest(std::string str)
         str.erase(0,pos+1);
     }
     else if(!str.empty()) {
-        _request.setType(str);
+        _request.setType(stringToLower(str));
     }
     else {
         _request.setRequestMethod(NO_METHOD);
