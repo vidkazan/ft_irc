@@ -1,6 +1,17 @@
 #pragma once
 #include "../main.hpp"
 
+typedef struct s_chan_modes {
+    bool o;
+    bool i;
+    bool t;
+    bool b;
+} t_chan_modes;
+
+typedef struct s_user_modes {
+    bool o;
+} t_user_modes;
+
 class Chan {
 private:
     int id;

@@ -2,143 +2,158 @@
 // Created by Dmitrii Grigorev on 27.03.22.
 //
 
-//<message>  ::= [':' <prefix> <SPACE> ] <command> <params> <crlf>
-//<prefix>   ::= <servername> | <nick> [ '!' <user> ] [ '@' <host> ]
-//<command>  ::= <letter> { <letter> } | <number> <number> <number>
-//<SPACE>
-//<params>
-//<middle>
-//::=''{''}
-//::= <SPACE> [ ':' <trailing> | <middle> <params> ]
-//::= <Any *non-empty* sequence of octets not including SPACE
-//or NUL or CR or LF, the first of which may not be ':'>
-//<trailing> ::= <Any, possibly *empty*, sequence of octets not including
-//        NUL or CR or LF>
-//<crlf>     ::= CR LF
-
-//<target>::= <to> [ "," <target> ]
-//<to> ::= <channel> | <user> '@' <servername> | <nick> | <mask>
-//<channel> ::= ('#' | '$') <chstring>
-//<nick>::= <letter> { <letter> | <number> | <special> }
-//<mask>::= <any 8bit code except SPACE, BELL, NUL, CR, LF and
-//<chstring>::= ('#' | '&') <chstring>
-//              comma (',')>
-
-
-
-
-
-
 
 #include "../main.hpp"
 
 void        Client::generateResponse()
 {
-//    std::cout << "log " << _socketFD << " _isAuthorisedPass " << _isAuthorisedPass << "\n" \
-//    "_msgUnAuthorisedMsg " << _msgUnAuthorisedMsg << "\n" \
-//    "_msgWrongPassMsg " << _msgWrongPassMsg << "\n" \
-//    "_msgStarMsg " << _msgStarMsg << "\n";
+    Reply* currentReply;
     std::string bufResp;
-    if(_msgUnAuthorisedMsg){
-        bufResp += ":localhost NOTICE AUTH : PASS is requred\n";
-        _msgUnAuthorisedMsg = false;
-        return;
-    }
-    else {
-        switch (_response.getResponseCodes()) {
+    while(_response.getFrontReply()!=nullptr) {
+        currentReply = _response.getFrontReply();
+        bufResp="";
+        switch (currentReply->getCode()) {
             case ERR_NORECIPIENT: {
-                bufResp += ":localhost 411 : No recipient given (" + _request.getType() + ")\n";
+                bufResp = ":localhost 411 : No recipient given (" + _request.getType() + ")\n";
                 break;
             }
             case ERR_CANNOTSENDTOCHAN: {
-                bufResp += ":localhost 404 "+_attrs[0]+" :Cannot send to channel\n";
+                bufResp = ":localhost 404 " + currentReply->getChan() + " :Cannot send to channel\n";
                 break;
             }
             case ERR_NOSUCHNICK: {
-                bufResp += ":localhost 401 "+_attrs[0]+" :No such nick\n";
+                bufResp = ":localhost 401 " + currentReply->getClient() + " :No such nick\n";
                 break;
             }
             case ERR_NOSUCHCHANNEL: {
-                bufResp += ":localhost 403 "+_attrs[0]+" :No such channel\n";
+                bufResp = ":localhost 403 " + currentReply->getChan() + " :No such channel\n";
                 break;
             }
             case ERR_NOTEXTTOSEND: {
-                bufResp += ":localhost 412 : No text to send\n";
+                bufResp = ":localhost 412 : No text to send\n";
                 break;
             }
             case ERR_NEEDMOREPARAMS: {
-                bufResp += ":localhost 461 "+_request.getType()+" :Not enough parameters\n";
+                bufResp = ":localhost 461 " + _request.getType() + " :Not enough parameters\n";
                 break;
             }
             case ERR_NICKNAMEINUSE: {
-                bufResp += ":localhost 432 "+_attrs[0]+" :Nickname is already in use\n";
+                bufResp = ":localhost 433 " + currentReply->getClient() + " :Nickname is already in use\n";
                 break;
             }
             case ERR_NOTREGISTERED: {
-                bufResp += ":localhost 451 : You have not registered\n";
+                bufResp = ":localhost 451 : You have not registered\n";
                 break;
             }
             case ERR_NONICKNAMEGIVEN: {
-                bufResp += ":localhost 431 : No nickname given\n";
+                bufResp = ":localhost 431 : No nickname given\n";
                 break;
             }
             case ERR_PASSWDMISMATCH: {
-                bufResp += ":localhost 464 : Password incorrect\n";
+                bufResp = ":localhost 464 : Password incorrect\n";
                 break;
             }
             case ERR_ALREADYREGISTRED: {
-                bufResp += ":localhost 462 : You may not register\n";
+                bufResp= ":localhost 462 : You may not register\n";
                 break;
             }
             case ERR_NOTONCHANNEL: {
-                bufResp += ":localhost 442 "+_attrs[0]+" : You're not on that channel\n";
-                break;
-            }
-            case REGISTERED: {
-                bufResp += ":localhost 001 "+_nickname+" :Welcome to the IRC server!\n";
-                bufResp += ":localhost 375 "+_nickname+" :- ft_irc Message of the Day -\n";
-                bufResp += ":localhost 372 "+_nickname+" :Welcomeeeeeeee!\n";
-                bufResp += ":localhost 376 "+_nickname+" :End of /MOTD command.\n";
-                _msgStarMsg = false;
+                bufResp = ":localhost 442 " + currentReply->getChan() + " : You're not on that channel\n";
                 break;
             }
             case ERR_UNKNOWNCOMMAND: {
-                bufResp += ":localhost 421 :Unknown command\n";
+                bufResp = ":localhost 421 "+_response.getFrontReply()->getOptional(0)+" :Unknown command\n";
                 break;
             }
             case ERR_USERNOTINCHANNEL: {
-                bufResp += ":localhost 441 "+_attrs[0]+" "+_attrs[1]+" :They aren't on that channel\n";
+                bufResp = ":localhost 441 " + currentReply->getClient() + " " + currentReply->getChan() + " :They aren't on that channel\n";
                 break;
             }
             case ERR_USERONCHANNEL: {
-                bufResp += ":localhost 443 "+_attrs[0]+" "+_attrs[1]+" :is already on channel\n";
+                bufResp = ":localhost 443 " + currentReply->getClient() + " " + currentReply->getClient() + " :is already on channel\n";
                 break;
             }
             case ERR_INVITEONLYCHAN: {
-                bufResp += ":localhost 473 "+_attrs[0]+ " :Cannot join channel (+i)\n";
+                bufResp = ":localhost 473 " + currentReply->getChan() + " :Cannot join channel (+i)\n";
                 break;
             }
             case ERR_CHANOPRIVSNEEDED: {
-                bufResp += ":localhost 482 "+_attrs[0]+ " :You're not channel operator\n";
+                bufResp = ":localhost 482 " + _nickname + " :You're not channel operator\n";
                 break;
             }
             case ERR_UNKNOWNMODE: {
-                bufResp += ":localhost 472 "+_attrs[0]+ " :is unknown mode char to me\n";
+                bufResp = ":localhost 472 " + currentReply->getOptional(0) + " :is unknown mode char to me\n";
                 break;
             }
-            case ERR_YOUREBANNEDCREEP: {
-                bufResp += ":localhost 465 :You are banned from this chan\n";
+            case ERR_BANNEDFROMCHAN: {
+                bufResp = ":localhost 465 "+currentReply->getChan()+" :Cannot join channel (+b)";
                 break;
             }
-            case ERR_FILEERROR:
-            case CODE_NOT_SET:
-                return;
+            case RPL_NOTOPIC: {
+                bufResp = ":"+_irc->getServerName()+" 331 "+_nickname+" "+currentReply->getChan()+" :No topic is set.\n";
+                break;
+            }
+            case RPL_TOPIC: {
+                bufResp = ":"+_irc->getServerName()+" 332 "+_nickname+" "+currentReply->getChan()+" :"+currentReply->getTopic()+"\n";
+                break;
+            }
+            case RPL_LISTSTART: {
+                bufResp = ":"+_irc->getServerName()+" 321 Channel :Users  Name\n";
+                break;
+            }
+            case RPL_LIST: {
+                for(std::vector<Chan>::iterator it = _irc->getChannels().begin();it != _irc->getChannels().end(); it++){
+                    bufResp += ":"+_irc->getServerName()+" 322 "+_nickname+" "+it->getName()+" "+ std::to_string(it->getChanClientsCount()) +" :"+it->getTopic()+"\n";
+                }
+                break;
+            }
+            case RPL_LISTEND: {
+                bufResp = ":"+_irc->getServerName()+" 323 "+":End of /LIST\n";
+                break;
+            }
+            case RPL_INVITING: {
+                bufResp = ":"+_irc->getServerName()+" 341 "+currentReply->getChan()+" "+currentReply->getClient()+"\n";
+                break;
+            }
+            case RPL_MOTDSTART:{
+                bufResp = ":"+_irc->getServerName()+" 375 " + _nickname + " : Message of the Day -\n";
+                break;
+            }
+            case RPL_MOTD:{
+                bufResp += ":"+_irc->getServerName()+" 372 " + _nickname + " :Welcomeeeeeeee!\n";
+                bufResp += ":"+_irc->getServerName()+" 372 " + _nickname + " :Welcomeeeeeeee!\n";
+                bufResp += ":"+_irc->getServerName()+" 372 " + _nickname + " :Welcomeeeeeeee!\n";
+                bufResp += ":"+_irc->getServerName()+" 372 " + _nickname + " :Welcomeeeeeeee!\n";
+                bufResp += ":"+_irc->getServerName()+" 372 " + _nickname + " :Welcomeeeeeeee!\n";
+                bufResp += ":"+_irc->getServerName()+" 372 " + _nickname + " :Welcomeeeeeeee!\n";
+                break;
+            }
+            case RPL_ENDOFMOTD:{
+                bufResp = ":"+_irc->getServerName()+" 376 " + _nickname + " :End of /MOTD command.\n";
+                break;
+            }
+            case RPL_NAMREPLY:{
+                bufResp = ":" + _irc->getServerName() + " 353 " + _nickname + " = " + currentReply->getOptional(0);
+                break;
+            }
+            case RPL_ENDOFNAMES:{
+                bufResp = ":" + _irc->getServerName() + " 366 " + currentReply->getChan() + " :End of /NAMES list\n";
+                break;
+            }
+            case ERR_FILEERROR:{
+                break;
+            }
+            case REGISTERED: {
+                bufResp = ":"+_irc->getServerName()+" 001 " + _nickname + " :Welcome to the IRC server!\n";
+                break;
+            }
+            case CODE_NOT_SET: {
+                break;
+            }
         }
+        _response.popFrontReply();
+        allocateResponse(bufResp);
     }
-    allocateResponse(bufResp);
-    _status = WRITING;
-    _response.setResponseCode(0);
-    _attrs.clear();
 }
 void        Client::allocateResponse(std::string bufResp) {
     std::string newBuf;
@@ -183,8 +198,8 @@ void        Client::sendResponse()
             return;
         }
         _response.addBytesSent(ret);
-//        std::cout << _socketFD << " send: " << " sent " << _response.getBytesSent() << " respSize "
-//                  << _response.getResponseSize() << "  \n";
+        std::cout << _socketFD << " send: " << " sent " << _response.getBytesSent() << " respSize "
+                  << _response.getResponseSize() << "  \n";
     }
     if(_response.getBytesSent() == (size_t)_response.getResponseSize())
     {

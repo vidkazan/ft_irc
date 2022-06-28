@@ -22,7 +22,7 @@ OBJS = $(SRCS:.cpp=.o)
 
 FLAGS = -O3 -g -Wall -Wextra -Werror -std=c++98
 
-COMP = g++
+COMP = clang++
 
 %.o: %.cpp		$(HDRS)
 				@$(COMP) $(FLAGS) -c $< -o $@

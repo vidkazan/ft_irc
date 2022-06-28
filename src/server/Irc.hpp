@@ -43,7 +43,6 @@ public:
         std::cout << "findChanByName: not found\n";
         return(nullptr);
     }
-	void                        configFileParse(){}
 	PortServer&    getPortServer(){return _portServer;}
 	std::vector<Client>&        getClients(){return _clients;}
     std::string       getServerName(){return _serverName;}
@@ -82,18 +81,6 @@ public:
         for(std::vector<Client>::iterator it = getClients().begin();it != getClients().end(); it++){
             std::cout << "Client " << it->getSocketFd() << " " << it->getNickName() << "\n";
         }
-    }
-    std::string              channelsList(std::string nickname)
-    {
-        std::string buf;
-//        :irc.colosolutions.net 321 pepego1 Channel :Users  Name
-        buf +=":"+_serverName+" 321 Channel :Users  Name\n";
-        for(std::vector<Chan>::iterator it = getChannels().begin();it != getChannels().end(); it++){
-            std::cout << _serverName << " " << it->getName() << "\n";
-            buf += ":"+_serverName+" 322 "+nickname+" "+it->getName()+" "+ std::to_string(it->getChanClientsCount()) +" :"+it->getTopic()+"\n";
-        }
-        buf += ":"+_serverName+" 323 "+":End of /LIST\n";
-        return buf;
     }
     void                    setMsgToClient(std::string senderNickname, std::string nickname, std::string msg){
         if(findClientByNickName(nickname))

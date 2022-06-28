@@ -4,7 +4,8 @@
 class Irc;
 class Chan;
 
-class Client {
+class Client 
+{
 private:
 	int                              _socketFD;
 	int                              _status;
@@ -20,19 +21,11 @@ private:
 //                      Auth
     bool                             _isAuthorisedPass;
     bool                             _isAuthorisedNickUser;
-    bool                             _msgUnAuthorisedMsg;
-    bool                             _msgStarMsg;
 //                      Chans
-    std::vector<Chan>                _chans;
-    //                  Attrs
-    std::vector<std::string>                _attrs;
-
 public:
                 Client(int fd, Irc* irc);
 	            ~Client(){};
     std::string getNickName(){return _nickname;}
-    bool        isAuth(){return _isAuthorisedPass;}
-    void        setIsAuthorised(){_isAuthorisedPass = true;}
 	int         getStatus() const {return _status;};
     Request&    getRequest(){return _request;};
     Response&   getResponse(){return _response;};
@@ -109,8 +102,22 @@ public:
 
     void        analyseRequest(std::string);
     bool        checkPassword(std::string);
-    void        generateNamesRPL(std::string);
-    void        handleTopic(std::string,std::string,bool);
+    //          methods
+    void methodNames(std::string);
+    void methodNick(std::string);
+    void methodPass(std::string);
+    void methodTopic(std::string);
+    void methodUser(std::string);
+    void methodPrivmsg(std::string);
+    void methodMode(std::string);
+    void methodPart(std::string);
+    void methodKick(std::string);
+    void methodPing(std::string);
+    void methodJoin(std::string);
+    void methodInvite(std::string);
+    void methodWho(std::string);
+
+    
 
 //              ClientResponse.cpp
 
@@ -124,7 +131,6 @@ public:
     void        recvBuffer();
 
 //              ClientRequestChans.cpp
-    void        addChannel(Chan&);
-    void        removeChannel(Chan&);
+
 };
 

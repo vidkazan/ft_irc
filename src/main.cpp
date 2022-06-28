@@ -11,7 +11,7 @@ void    mainPrint(Irc & Irc)
     std::cout << "|" << std::setw(7) << "   id  " << "|" << std::setw(4) << " fd " << "|" << std::setw(10) << "  method  " << "|" << std::setw(10) << "   sent   " << "|" << std::setw(6) << " code " <<"|"<<" received " << "|\n";
     for(std::vector<Client>::iterator it = Irc.getClients().begin();it != Irc.getClients().end(); it++)
     {
-        std::cout << "|" << std::setw(7) << it->getRequest().getRequestId() << "|" << std::setw(4) << it->getSocketFd() << "|"<< std::setw(10) << it->getRequest().getRequestMethod()<< "|" << std::setw(10) << it->getResponse().getBytesSent() << "|" <<  std::setw(6) << std::to_string(it->getResponse().getResponseCodes()) << "|" << std::setw(10) << it->getRequest().getBytesReceieved() << "|\n";
+        std::cout << "|" << std::setw(7) << it->getRequest().getRequestId() << "|" << std::setw(4) << it->getSocketFd() << "|"<< std::setw(10) << it->getRequest().getRequestMethod()<< "|" << std::setw(10) << it->getResponse().getBytesSent() << "|" <<  std::setw(6) << std::to_string(it->getResponse().getFrontReply()->getCode()) << "|" << std::setw(10) << it->getRequest().getBytesReceieved() << "|\n";
     }
 }
 void    printIrcServers(Irc &Irc)
