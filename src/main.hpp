@@ -9,3 +9,4 @@
 #define WHITE "\e[39m"
 
 void        printLog(std::string description,std::string msg,std::string color);
+void        validateArgv(int argc, char **argv);

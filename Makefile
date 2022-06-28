@@ -3,6 +3,7 @@ NAME = ft_irc
 
 SRCS =	src/main.cpp \
  		src/other/utils.cpp \
+		src/other/validateArgv.cpp \
 	    src/irc/ClientRequestParse.cpp \
 	    src/irc/ClientRequestAnalyse.cpp \
 	    src/irc/ClientResponse.cpp \

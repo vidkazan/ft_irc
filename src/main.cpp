@@ -21,9 +21,8 @@ void    printIrcServers(Irc &Irc)
 
 int     main(int argc, char ** argv)
 {
-    // TODO argv checking
-    if(argc < 3)
-        return 1;
+    validateArgv(argc, argv);
+
 	Irc Irc(atoi(argv[1]), "0.0.0.0", argv[2]);
 	startMessage();
     listen(Irc.getPortServer().getSocketFD(), 1000);
