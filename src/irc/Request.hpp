@@ -1,5 +1,4 @@
 #pragma once
-#include "../main.hpp"
 
 enum RequestMethod{
 	NO_METHOD,
@@ -19,7 +18,8 @@ enum RequestMethod{
     INVITE,
     MODE,
     KICK,
-    WHO
+    WHO,
+    USERHOST,
 };
 
 class Request{

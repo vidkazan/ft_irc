@@ -1,7 +1,7 @@
 //
 // Created by Dmitrii Grigorev on 27.03.22.
 //
-#include "../main.hpp"
+#include "Client.hpp"
 
         Client::Client(int fd, Irc* irc): _socketFD(fd),\
                                         _status(READING),\
@@ -104,6 +104,9 @@ void        Client::analyseRequest(std::string line)
         }
         case MODE: {
             methodMode(line);
+            break;
+        }
+        case USERHOST: {
             break;
         }
         case WHO: {

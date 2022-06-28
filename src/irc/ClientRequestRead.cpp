@@ -2,8 +2,7 @@
 // Created by Dmitrii Grigorev on 27.03.22.
 //
 
-#include "../main.hpp"
-
+#include "Client.hpp"
 void        printAsInt(std::string str)
 {
             std::cout << "|";

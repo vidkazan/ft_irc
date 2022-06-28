@@ -1,5 +1,5 @@
 #include "main.hpp"
-
+#include "irc/Client.hpp"
 void    startMessage(){
     printLog("", "______________________________________________________________|\n"
                  "|_________________________IRC START_________________________|\n"

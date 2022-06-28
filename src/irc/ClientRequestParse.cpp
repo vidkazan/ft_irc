@@ -2,7 +2,15 @@
 // Created by Dmitrii Grigorev on 27.03.22.
 //
 
-#include "../main.hpp"
+#include "Client.hpp"
+
+std::string Client::stringToUpper(std::string str){
+    std::string res;
+    for(int i=0;i<str.size();i++) {
+        res+= toupper(str[i]);
+    }
+    return res;
+}
 
 void        Client::parseRequest(std::string str)
 {
@@ -62,6 +70,9 @@ void        Client::parseRequest(std::string str)
     }
     else if(_request.getType() == "MODE") {
         _request.setRequestMethod(MODE);
+    }
+    else if(_request.getType() == "USERHOST") {
+        _request.setRequestMethod(USERHOST);
     }
     else {
         _request.setRequestMethod(OTHER_METHOD);

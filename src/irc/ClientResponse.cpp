@@ -3,8 +3,7 @@
 //
 
 
-#include "../main.hpp"
-
+#include "Client.hpp"
 void        Client::generateResponse()
 {
     Reply* currentReply;
@@ -138,6 +137,9 @@ void        Client::generateResponse()
             }
             case RPL_ENDOFNAMES:{
                 bufResp = ":" + _irc->getServerName() + " 366 " + currentReply->getChan() + " :End of /NAMES list\n";
+                break;
+            }
+            case RPL_USERHOST:{
                 break;
             }
             case ERR_FILEERROR:{

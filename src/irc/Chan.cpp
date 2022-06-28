@@ -1,5 +1,5 @@
 
-#include "../main.hpp"
+#include "Chan.hpp"
 
 void Chan::setMsgToAllClients(std::string except,std::string msg, Irc* irc){
     for(std::vector<std::pair<std::string,t_user_modes> >::iterator it = _clients.begin();it != _clients.end(); it++){

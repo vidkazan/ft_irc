@@ -1,8 +1,10 @@
 #pragma once
-#include "../main.hpp"
+#include "../irc/Chan.hpp"
+#include "../irc/Client.hpp"
+#include "PortServer.hpp"
 
-class PortServer;
-
+class Chan;
+class Client;
 class Irc{
 private:
 	PortServer                  _portServer;
@@ -19,72 +21,16 @@ public:
         }
     }
     ~Irc(){}
-    Client*                     findClientByNickName(std::string nickname)
-    {
-        for(std::vector<Client>::iterator it = getClients().begin();it != getClients().end(); it++){
-//            std::cout << "findClientByNickName: check: |" << it->getNickName() << "|" << nickname << "|\n";
-            if(it->getNickName() == nickname)
-            {
-                return(&(*it));
-            }
-        }
-        std::cout << "findClientByNickName: not found\n";
-        return(nullptr);
-    }
-    Chan*                     findChanByName(std::string name)
-    {
-        for(std::vector<Chan>::iterator it = getChannels().begin();it != getChannels().end(); it++){
-//            std::cout << "findClientByNickName: check: |" << it->getNickName() << "|" << nickname << "|\n";
-            if(it->getName() == name)
-            {
-                return(&(*it));
-            }
-        }
-        std::cout << "findChanByName: not found\n";
-        return(nullptr);
-    }
-	PortServer&    getPortServer(){return _portServer;}
-	std::vector<Client>&        getClients(){return _clients;}
-    std::string       getServerName(){return _serverName;}
-    std::vector<Chan>&        getChannels(){return _channels;}
-    bool                        checkPassword(std::string check)
-    {
-        if(check == _password)
-            return true;
-        else
-            return false;
-    }
-	void                        addClient(int fd, Irc* irc)
-    {
-		Client client(fd, irc);
-		_clients.push_back(client);
-	}
-    bool                        addChannel(std::string name, std::string nickname)
-    {
-        for(std::vector<Chan>::iterator it = _channels.begin();it != _channels.end(); it++){
-            if(it->getName() == name)
-            {
-                if(it->addClient(nickname))
-                    return 1;
-                else
-                    return 0; // already there
-            }
-        }
-        std::cout << "irc: create new chan: " << name << " by " << nickname << "\n";
-        Chan chan(nickname,name);
-        _channels.push_back(chan);
-        _channels.back().addClient(nickname);
-        return 1;
-    }
-    void                     printAllClients()
-    {
-        for(std::vector<Client>::iterator it = getClients().begin();it != getClients().end(); it++){
-            std::cout << "Client " << it->getSocketFd() << " " << it->getNickName() << "\n";
-        }
-    }
-    void                    setMsgToClient(std::string senderNickname, std::string nickname, std::string msg){
-        if(findClientByNickName(nickname))
-            findClientByNickName(nickname)->allocateResponse(msg);
-    }
+    Client*                     findClientByNickName(std::string nickname);
+    Chan*                     findChanByName(std::string name);
+	PortServer&    getPortServer();
+	std::vector<Client>&        getClients();
+    std::string       getServerName();
+    std::vector<Chan>&        getChannels();
+    bool                        checkPassword(std::string check);
+	void                        addClient(int fd, Irc* irc);
+    bool                        addChannel(std::string name, std::string nickname);
+    void                     printAllClients();
+    void                    setMsgToClient(std::string senderNickname, std::string nickname, std::string msg);
 };
 

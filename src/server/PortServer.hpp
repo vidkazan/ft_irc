@@ -1,5 +1,6 @@
 #pragma once
-#include "../main.hpp"
+#include <arpa/inet.h>
+#include <unistd.h>
 
 class PortServer{
 private:

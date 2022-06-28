@@ -9,6 +9,7 @@ SRCS =	src/main.cpp \
 	    src/irc/ClientRequestRead.cpp \
 	    src/irc/ClientRequestChans.cpp \
 	    src/irc/Chan.cpp \
+	    src/server/Irc.cpp \
 
 HDRS =  src/server/Webserv.hpp\
  		src/main.hpp \

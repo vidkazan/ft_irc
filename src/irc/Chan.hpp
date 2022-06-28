@@ -1,6 +1,6 @@
 #pragma once
-#include "../main.hpp"
-
+#include "Client.hpp"
+class Irc;
 typedef struct s_chan_modes {
     bool o;
     bool i;

@@ -1,5 +1,6 @@
 #pragma once
-#include "../main.hpp"
+#include <fstream>
+#include "Reply.hpp"
 
 class Response{
 private:
