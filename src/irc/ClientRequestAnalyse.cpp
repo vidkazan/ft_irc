@@ -268,13 +268,64 @@ void       Client::methodPrivmsg(std::string line){
     } else if (line.empty()) {
         _response.addReply(ERR_NORECIPIENT);
     } else {
+
+        /*
+        посчитать кол-во запятых, выделить память под это кол-во (?? может ли быть запятая в нике ??);
+        разделить receiverNames по запятым и засунуть в массив names;
+        for по этим именам;
+        */
+
+
+        // находим позицию :
+        size_t p = line.find(':');
+        if (p == std::string::npos) {
+            _response.addReply(ERR_NOTEXTTOSEND);
+            return;
+        }
+        // строка только с именами и запятыми
+        std::string receiverNames;
+        receiverNames = line.substr(0, p - 1);
+
+        // считаем кол-во запятых
+        int n = 0;
+        for (int i = 0; i < receiverNames.length(); i++) {
+            if (receiverNames[i] == ',') {
+                n++;
+            }
+        }
+        std::cout << "**** " << n << std::endl;
+
+        // получаетелей на один больше чем запятых
+        std::string *names = new std::string[n + 1];
+
+        // разделяем receiverNames по запятым и кидаем в массив names;
+        std::string name;
+        if (n == 0) {
+            // если одно имя и нет запятых
+            names[0] = receiverNames;
+        } else {
+            // TODO заносить name в масив names
+            int l = 0;
+            for (; n >= 0; n--) {
+                size_t m = receiverNames.find(',');
+                // if (m != std::string::npos) {
+                name = line.substr(l, m);
+                l = m + 1;
+                std::cout << "------ " << name << "|\n";
+            }
+        }
+
+        // for () {
+// 
+        // }
+
 //                std::cout << "PRIVMSG: buffer |" << line << "|\n";
         std::string msg;
         std::string receiverName;
         size_t pos = line.find(':');
         if (pos != std::string::npos) {
             receiverName = line.substr(0, pos - 1);
-//                    std::cout << "analyse: PRIVMSG: receiverName " << receiverName << "\n";
+                //    std::cout << "analyse: PRIVMSG: receiverName " << receiverName << "\n";
             msg = ":" + _nickname + " PRIVMSG " + receiverName + " " +
                   line.substr(pos, _request.getBuffer().size() - pos);
 //                    std::cout << "analyse: PRIVMSG: msg " << msg << "\n";
@@ -302,6 +353,8 @@ void       Client::methodPrivmsg(std::string line){
         } else {
             _response.addReply(ERR_NOTEXTTOSEND);
         }
+
+        delete[] names;
     }
 }
 void       Client::methodMode(std::string line){ // TODO messages check
