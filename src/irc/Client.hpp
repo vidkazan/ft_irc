@@ -62,6 +62,7 @@ public:
     void methodJoin(std::string);
     void methodInvite(std::string);
     void methodWho(std::string);
+    void methodQuit(std::string);
 
 //              ClientResponse.cpp
 

@@ -82,8 +82,7 @@ public:
         }
         return 0;
     }
-    void setMsgToAllClients(std::string ,std::string, Irc*);
-    void setMsgToAllClients(std::string, Irc*);
+    void setMsgToAllClients(Irc* irc,Reply msg, std::string except="");
     int  getChanClientsCount(){return _clients.size();}
     std::string getChanNames() {
         std::string names;
@@ -95,9 +94,6 @@ public:
         }
         names += "\n";
         return  names;
-    }
-    std::string getTopicRPL(){
-        return (_name+" :"+_topic);
     }
     void addClientInvite(std::string client){
         for(std::vector<std::string>::iterator it = _invitedClients.begin();it!=_invitedClients.end();it++) {

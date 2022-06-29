@@ -15,8 +15,6 @@ public:
 				_responseSize(-1) \
                  {};
 	virtual             ~Response(){};
-//	replyCodes  &getResponseCodes(){return _responseCodes;};
-//	void                setResponseCode(int code){_responseCodes = static_cast<replyCodes>(code);}
 	size_t              getBytesSent() const{return _bytesSent;}
 	ssize_t             getResponseSize() const{return _responseSize;}
 	char*               getResponse() const {return _response;};
@@ -25,9 +23,17 @@ public:
 		_response = resp;
 	};
 	void                addBytesSent(size_t addBytes){_bytesSent += addBytes;}
-    void addReply(replyCodes code, std::string chan="",std::string client="",std::string fullreply="",std::string topic="") {
-        _replyQueue.push_back(Reply(code,chan,client,fullreply,topic));
+    void addReply(replyCodes code, std::string chan="",std::string receiver="",std::string sender="",std::string msg="") {
+        _replyQueue.push_back(Reply(code,chan,receiver,sender,msg));
     }
+
+    void addMsg(replyCodes code, std::string chan="",std::string receiver="",std::string sender="",std::string msg="") {
+        _replyQueue.push_back(Reply(code,chan,receiver,sender,msg));
+    }
+    void addMsg(Reply msg) {
+        _replyQueue.push_back(msg);
+    }
+
     Reply* getLastReply() {
         if(_replyQueue.empty())
             return nullptr;
