@@ -2,6 +2,7 @@
 // Created by Dmitrii Grigorev on 27.03.22.
 //
 #include "Client.hpp"
+#include "../main.hpp"
 
         Client::Client(int fd, Irc* irc): _socketFD(fd),\
                                         _status(READING),\
@@ -262,6 +263,8 @@ void       Client::methodUser(std::string line){
         }
     }
 }
+
+// usage: <receiver>{,<receiver>} <text to be sent>
 void       Client::methodPrivmsg(std::string line){
     if (!_isAuthorisedNickUser) {
         _response.addReply(ERR_NOTREGISTERED);
@@ -277,77 +280,23 @@ void       Client::methodPrivmsg(std::string line){
 
 
         // находим позицию :
-        size_t p = line.find(':');
-        if (p == std::string::npos) {
+        size_t pos = line.find(':');
+        if (pos == std::string::npos) {
             _response.addReply(ERR_NOTEXTTOSEND);
             return;
         }
 
-        // строка только с именами и запятыми
-        std::string receiverNames;
-        receiverNames = line.substr(0, p - 1);
-
-        // считаем кол-во запятых
-        int n = 0;
-        for (int i = 0; i < receiverNames.length(); i++) {
-            if (receiverNames[i] == ',') {
-                n++;
-            }
-        }
-        // std::cout << "**** " << n << std::endl;
-        // получаетелей на один больше чем запятых
-        // n - кол-во получателей
-        n++;
-
-
-// заменить массив на вектор
-// использовать split
-
-/*
-PRIVMSG a,c,b :bbbb
-
-
-*** a
-*** c,b
-*** b :bbbb
-0000000000000000 3
-*/
-
-        std::string *names = new std::string[n];
-
-        // разделяем receiverNames по запятым и кидаем в массив names;
-        if (n == 1) {
-            // если одно имя и нет запятых
-            names[0] = receiverNames;
-        } else {
-            int l = 0;
-            size_t m = 0;
-            for (int i = 0; i < n; i++) {
-                if (i == 0) {
-                    m = receiverNames.find(',', 0);
-                } else {
-                    m = receiverNames.find(',', m + 1);
-                }
-                names[i] = line.substr(l, m);
-                l = m + 1;
-            }
-        }
-
-        for (int i = 0; i < n ; i++) {
-            std::cout << "*** " << names[i] << "\n";
-        }
-
-        std::cout << "0000000000000000 " << n << std::endl;
+        // отправляем сроку только с именами и запятыми
+        std::vector<std::string> names = split(line.substr(0, pos - 1), ",");
+        int n = names.size();
 
         for (int i = 0; i < n; i++) {
             std::cout << "--- " << i << " " << names[i] << "\n";
             
-
     //                std::cout << "PRIVMSG: buffer |" << line << "|\n";
             std::string msg;
             std::string receiverName;
             receiverName = names[i];
-            size_t pos = p;
             // size_t pos = line.find(':');
             // if (pos != std::string::npos) {
             // receiverName = line.substr(0, pos - 1);
@@ -386,7 +335,7 @@ PRIVMSG a,c,b :bbbb
             // }
         }
 
-        delete[] names;
+        // delete[] names;
     }
 }
 void       Client::methodMode(std::string line){ // TODO messages check
