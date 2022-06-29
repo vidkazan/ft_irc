@@ -264,46 +264,29 @@ void       Client::methodUser(std::string line){
     }
 }
 
-// usage: <receiver>{,<receiver>} <text to be sent>
+// usage: <receiver>{,<receiver>} :<text to be sent>
 void       Client::methodPrivmsg(std::string line){
     if (!_isAuthorisedNickUser) {
         _response.addReply(ERR_NOTREGISTERED);
     } else if (line.empty()) {
         _response.addReply(ERR_NORECIPIENT);
     } else {
-
-        /*
-        посчитать кол-во запятых, выделить память под это кол-во (?? может ли быть запятая в нике ??);
-        разделить receiverNames по запятым и засунуть в массив names;
-        for по этим именам;
-        */
-
-
-        // находим позицию :
         size_t pos = line.find(':');
         if (pos == std::string::npos) {
             _response.addReply(ERR_NOTEXTTOSEND);
             return;
         }
 
-        // отправляем сроку только с именами и запятыми
+        // send a string without message text (only with names and commas)
         std::vector<std::string> names = split(line.substr(0, pos - 1), ",");
-        int n = names.size();
-
-        for (int i = 0; i < n; i++) {
-            std::cout << "--- " << i << " " << names[i] << "\n";
-            
-    //                std::cout << "PRIVMSG: buffer |" << line << "|\n";
+        
+        for (int i = 0; i < names.size(); i++) {
+            std::string receiverName = names[i];
             std::string msg;
-            std::string receiverName;
-            receiverName = names[i];
-            // size_t pos = line.find(':');
-            // if (pos != std::string::npos) {
-            // receiverName = line.substr(0, pos - 1);
-                //    std::cout << "analyse: PRIVMSG: receiverName " << receiverName << "\n";
+
             msg = ":" + _nickname + " PRIVMSG " + receiverName + " " +
                 line.substr(pos, _request.getBuffer().size() - pos);
-//                    std::cout << "analyse: PRIVMSG: msg " << msg << "\n";
+
             msg.append("\r\n");
             if (receiverName[0] == '#' || receiverName[0] == '&') {
                 if (_irc->findChanByName(receiverName) == nullptr) {
@@ -314,28 +297,18 @@ void       Client::methodPrivmsg(std::string line){
                     _response.addReply(ERR_CANNOTSENDTOCHAN,receiverName);
                 } else {
                     _irc->findChanByName(receiverName)->setMsgToAllClients(_nickname,msg, _irc);
-                    // return;
-                    
                     continue;
                 }
             } else {
                 if (_irc->findClientByNickName(receiverName) != nullptr) {
                     _irc->findClientByNickName(receiverName)->allocateResponse(msg);
                     _irc->findClientByNickName(receiverName)->setStatus(WRITING);
-                    // return;
                     continue;
                 } else {
-                    std::cout << "&&&&&&&&& " << i << " " << receiverName << "\n";
                     _response.addReply(ERR_NOSUCHNICK,"",receiverName);
                 }
             }
-            // }
-            // else {
-            //     _response.addReply(ERR_NOTEXTTOSEND);
-            // }
         }
-
-        // delete[] names;
     }
 }
 void       Client::methodMode(std::string line){ // TODO messages check

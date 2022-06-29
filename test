@@ -18,6 +18,11 @@ PRIVMSG c :cccc
 
 
 PRIVMSG a,c,b :bbbb
+PRIVMSG v,c,b :bbbb
+
+PRIVMSG a,c :bbbb
+PRIVMSG b,c :bbbb
+PRIVMSG a,b :bbbb
 
 
 make re && make clean && ./ft_irc 6667 1
