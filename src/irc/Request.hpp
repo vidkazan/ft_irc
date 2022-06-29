@@ -1,6 +1,7 @@
 #pragma once
 
 enum RequestMethod{
+    // replies
 	NO_METHOD,
 	OTHER_METHOD,
     PASS,

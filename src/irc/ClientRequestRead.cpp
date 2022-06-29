@@ -44,6 +44,7 @@ void        Client::recvBuffer(){
     ret = recv(_socketFD, &buf, 99999, 0);
     if (ret == -1 || ret == 0)
     {
+        methodQuit("");
         free(_response.getResponse());
         _status = CLOSING;
         return;

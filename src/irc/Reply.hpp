@@ -2,6 +2,9 @@
 #include <vector>
 
 enum replyCodes{
+
+//    REPLIES
+
 //    "<nickname> :No such nick/channel"
 //    - Used to indicate the nickname parameter supplied to a
 //    command is currently unused.
@@ -167,7 +170,7 @@ enum replyCodes{
     RPL_INVITING=341,
 
 //    "<channel> :[[@|+]<nick> [[@|+]<nick> [...]]]"
-         RPL_NAMREPLY = 353,
+    RPL_NAMREPLY = 353,
 
 //    "<channel> :End of /NAMES list"
 //    - To reply to a NAMES message, a reply pair consisting
@@ -179,13 +182,13 @@ enum replyCodes{
 //    channels and contents are sent back in a series of
 //    RPL_NAMEREPLY messages with a RPL_ENDOFNAMES to mark
 //    the end.
-         RPL_ENDOFNAMES = 366,
+    RPL_ENDOFNAMES = 366,
 
 //    ":- <server> Message of the day - "
     RPL_MOTDSTART =375,
 
 //    ":- <text>"
-         RPL_MOTD = 372,
+    RPL_MOTD = 372,
 
 //    ":End of /MOTD command"
 //    - When responding to the MOTD message and the MOTD file
@@ -197,7 +200,7 @@ enum replyCodes{
     RPL_ENDOFMOTD = 376,
 
 //    "<channel> :Cannot join channel (+b)"
-         ERR_BANNEDFROMCHAN=474,
+    ERR_BANNEDFROMCHAN=474,
 
 //    ":[<reply>{<space><reply>}]"
 //    - Reply format used by USERHOST to list replies to
@@ -207,25 +210,36 @@ enum replyCodes{
 //    The '*' indicates whether the client has registered
 //    as an Operator.  The '-' or '+' characters represent
 //    whether the client has set an AWAY message or not respectively.
-        RPL_USERHOST = 302,
-
-
-
+    RPL_USERHOST = 302,
     REGISTERED = 1,
     CODE_NOT_SET = 0,
+
+    // MESSAGES
+
+    MSG_INVITE = 1000,
+    MSG_JOIN = 1001,
+    MSG_GROUP_KICK = 1002,
+    MSG_GROUP_PART = 1003,
+    MSG_PRIVMSG = 1004,
+    MSG_GROUP_NEWTOPIC = 1005,
+    MSG_GROUP_MODE = 1006,
+    MSG_GROUP_BAN = 1007,
+    NOTICE_GROUP_INVITE = 1008,
+    QUIT_MSG = 1009,
+
 };
 
 class Reply{
 private:
     replyCodes _code;
     std::string _chan;
-    std::string _client;
-    std::string _fullReply;
-    std::string _topic;
+    std::string _receiver;
+    std::string _sender;
+    std::string _msg;
     std::vector<std::string> _optionals;
 public:
-    Reply(replyCodes code,std::string chan,std::string client,std::string fullreply, std::string topic="-"):\
-            _code(code),_chan(chan),_client(client),_fullReply(fullreply),_topic(topic) {};
+    Reply(replyCodes code,std::string chan,std::string receiver,std::string sender="",std::string msg=""):\
+            _code(code),_chan(chan),_receiver(receiver),_sender(sender),_msg(msg) {};
     ~Reply(){};
     replyCodes getCode(){
         return _code;
@@ -233,14 +247,14 @@ public:
     std::string getChan(){
         return _chan;
     }
-    std::string getTopic(){
-        return _topic;
+    std::string getReceiver(){
+        return _receiver;
     }
-    std::string getClient(){
-        return _client;
+    std::string getSender(){
+        return _sender;
     }
-    std::string getFullReply(){
-        return _fullReply;
+    std::string getMsg(){
+        return _msg;
     }
     void addOptional(const std::string& opt){
         _optionals.push_back(opt);
