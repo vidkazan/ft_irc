@@ -279,7 +279,7 @@ void       Client::methodPrivmsg(std::string line){
 
         // send a string without message text (only with names and commas)
         std::vector<std::string> names = split(line.substr(0, pos - 1), ",");
-        
+
         for (int i = 0; i < names.size(); i++) {
             std::string receiverName = names[i];
             std::string msg;
@@ -311,6 +311,7 @@ void       Client::methodPrivmsg(std::string line){
         }
     }
 }
+
 void       Client::methodMode(std::string line){ // TODO messages check
     char modeChar = 0;
     int modeSign = -1;
@@ -444,6 +445,8 @@ void       Client::methodPing(std::string line){
     msg.append(":" + _irc->getServerName() + " PONG " + ":" + _irc->getServerName() + " " + line + "\n");
     allocateResponse(msg);
 }
+
+// TODO проверить не нужно ли засунуть 2й и 3й else if в for
 void       Client::methodJoin(std::string line) {
     if (!_isAuthorisedNickUser) {
         _response.addReply(ERR_NOTREGISTERED);
@@ -456,18 +459,24 @@ void       Client::methodJoin(std::string line) {
     } else {
         if (line[0] == ':')
             line.erase(line.begin());
-        if (line[0] != '#' && line[0] != '&')
-            line.insert(line.begin(), '#');
-        if(_irc->addChannel(line, _nickname)) {
-            std::string msg = ":" + _nickname+"!"+_username+"@"+_irc->getPortServer().getIp() + " JOIN " + line + "\n";
-            _irc->findChanByName(line)->setMsgToAllClients(msg, _irc);
-            methodTopic(line);
-            methodNames(line);
-        } else {
-//                    std::cout << "join: joined already\n";
+        std::vector<std::string> channels = split(line, ",");
+
+        for (int i = 0; i < channels.size(); i++) {
+            if (channels[i][0] != '#' && channels[i][0] != '&')
+                channels[i].insert(channels[i].begin(), '#');
+            if(_irc->addChannel(channels[i], _nickname)) {
+                std::string msg = ":" + _nickname+"!"+_username+"@"+_irc->getPortServer().getIp() + " JOIN " + channels[i] + "\n";
+                _irc->findChanByName(channels[i])->setMsgToAllClients(msg, _irc);
+                methodTopic(channels[i]);
+                methodNames(channels[i]);
+            } else {
+                    //    std::cout << "join: joined already\n";
+            }
         }
+
     }
 }
+
 void       Client::methodInvite(std::string line) {
     size_t pos;
     std::string client;
