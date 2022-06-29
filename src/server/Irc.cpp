@@ -35,9 +35,9 @@ bool                  Irc::checkPassword(std::string check)
     else
         return false;
 }
-void                  Irc::addClient(int fd, Irc* irc)
+void                  Irc::addClient(int fd, Irc* irc,std::string ip)
 {
-    Client client(fd, irc);
+    Client client(fd, irc,ip);
     _clients.push_back(client);
 }
 bool                  Irc::addChannel(std::string name, std::string nickname)

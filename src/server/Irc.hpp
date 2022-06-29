@@ -28,7 +28,7 @@ public:
     std::string       getServerName();
     std::vector<Chan>&        getChannels();
     bool                        checkPassword(std::string check);
-	void                        addClient(int fd, Irc* irc);
+	void                        addClient(int fd, Irc* irc,std::string ip);
     bool                        addChannel(std::string name, std::string nickname);
     void                     printAllClients();
     void                    setMsgToClient(std::string senderNickname, std::string nickname, std::string msg);
