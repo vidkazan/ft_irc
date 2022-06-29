@@ -1,4 +1,8 @@
 PASS 1
+NICK a
+USER a localhost d as
+
+PASS 1
 NICK b
 USER b localhost d bs
 
@@ -13,7 +17,7 @@ PRIVMSG b :bbbb
 PRIVMSG c :cccc
 
 
-PRIVMSG c,b :bbbb
+PRIVMSG a,c,b :bbbb
 
 
 make re && make clean && ./ft_irc 6667 1

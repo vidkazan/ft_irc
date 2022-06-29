@@ -282,6 +282,7 @@ void       Client::methodPrivmsg(std::string line){
             _response.addReply(ERR_NOTEXTTOSEND);
             return;
         }
+
         // строка только с именами и запятыми
         std::string receiverNames;
         receiverNames = line.substr(0, p - 1);
@@ -293,41 +294,66 @@ void       Client::methodPrivmsg(std::string line){
                 n++;
             }
         }
-        std::cout << "**** " << n << std::endl;
-
+        // std::cout << "**** " << n << std::endl;
         // получаетелей на один больше чем запятых
-        std::string *names = new std::string[n + 1];
+        // n - кол-во получателей
+        n++;
+
+
+// заменить массив на вектор
+// использовать split
+
+/*
+PRIVMSG a,c,b :bbbb
+
+
+*** a
+*** c,b
+*** b :bbbb
+0000000000000000 3
+*/
+
+        std::string *names = new std::string[n];
 
         // разделяем receiverNames по запятым и кидаем в массив names;
-        std::string name;
-        if (n == 0) {
+        if (n == 1) {
             // если одно имя и нет запятых
             names[0] = receiverNames;
         } else {
-            // TODO заносить name в масив names
             int l = 0;
-            for (; n >= 0; n--) {
-                size_t m = receiverNames.find(',');
-                // if (m != std::string::npos) {
-                name = line.substr(l, m);
+            size_t m = 0;
+            for (int i = 0; i < n; i++) {
+                if (i == 0) {
+                    m = receiverNames.find(',', 0);
+                } else {
+                    m = receiverNames.find(',', m + 1);
+                }
+                names[i] = line.substr(l, m);
                 l = m + 1;
-                std::cout << "------ " << name << "|\n";
             }
         }
 
-        // for () {
-// 
-        // }
+        for (int i = 0; i < n ; i++) {
+            std::cout << "*** " << names[i] << "\n";
+        }
 
-//                std::cout << "PRIVMSG: buffer |" << line << "|\n";
-        std::string msg;
-        std::string receiverName;
-        size_t pos = line.find(':');
-        if (pos != std::string::npos) {
-            receiverName = line.substr(0, pos - 1);
+        std::cout << "0000000000000000 " << n << std::endl;
+
+        for (int i = 0; i < n; i++) {
+            std::cout << "--- " << i << " " << names[i] << "\n";
+            
+
+    //                std::cout << "PRIVMSG: buffer |" << line << "|\n";
+            std::string msg;
+            std::string receiverName;
+            receiverName = names[i];
+            size_t pos = p;
+            // size_t pos = line.find(':');
+            // if (pos != std::string::npos) {
+            // receiverName = line.substr(0, pos - 1);
                 //    std::cout << "analyse: PRIVMSG: receiverName " << receiverName << "\n";
             msg = ":" + _nickname + " PRIVMSG " + receiverName + " " +
-                  line.substr(pos, _request.getBuffer().size() - pos);
+                line.substr(pos, _request.getBuffer().size() - pos);
 //                    std::cout << "analyse: PRIVMSG: msg " << msg << "\n";
             msg.append("\r\n");
             if (receiverName[0] == '#' || receiverName[0] == '&') {
@@ -339,19 +365,25 @@ void       Client::methodPrivmsg(std::string line){
                     _response.addReply(ERR_CANNOTSENDTOCHAN,receiverName);
                 } else {
                     _irc->findChanByName(receiverName)->setMsgToAllClients(_nickname,msg, _irc);
-                    return;
+                    // return;
+                    
+                    continue;
                 }
             } else {
                 if (_irc->findClientByNickName(receiverName) != nullptr) {
                     _irc->findClientByNickName(receiverName)->allocateResponse(msg);
                     _irc->findClientByNickName(receiverName)->setStatus(WRITING);
-                    return;
+                    // return;
+                    continue;
                 } else {
+                    std::cout << "&&&&&&&&& " << i << " " << receiverName << "\n";
                     _response.addReply(ERR_NOSUCHNICK,"",receiverName);
                 }
             }
-        } else {
-            _response.addReply(ERR_NOTEXTTOSEND);
+            // }
+            // else {
+            //     _response.addReply(ERR_NOTEXTTOSEND);
+            // }
         }
 
         delete[] names;
