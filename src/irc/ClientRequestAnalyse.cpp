@@ -57,9 +57,12 @@ void        Client::analyseRequest(std::string line)
             methodUser(line);
             break;
         }
-        case NOTICE: // TODO NOTICE
+        case NOTICE: {
+            methodPrivmsg(line,1);
+            break;
+        }
         case PRIVMSG: {
-            methodPrivmsg(line);
+            methodPrivmsg(line,0);
             break;
         }
         case INVITE: {
@@ -100,16 +103,12 @@ void        Client::analyseRequest(std::string line)
             methodKick(line);
             break;
         }
-        case PART:
-        {
+        case PART: {
             methodPart(line);
             break;
         }
         case MODE: {
             methodMode(line);
-            break;
-        }
-        case USERHOST: {
             break;
         }
         case WHO: {

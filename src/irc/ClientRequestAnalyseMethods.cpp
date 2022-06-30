@@ -79,7 +79,7 @@ void       Client::methodPass(std::string line){
         _response.addReply(ERR_PASSWDMISMATCH);
     }
 }
-void       Client::methodNick(std::string line){ // TODO nickname lexicographical validating
+void       Client::methodNick(std::string line){
     if (_isAuthorisedNickUser) {
         std::cout << _socketFD << "NICK ERR_ALREADYREGISTRED \n";
         _response.addReply(ERR_ALREADYREGISTRED);
@@ -89,6 +89,9 @@ void       Client::methodNick(std::string line){ // TODO nickname lexicographica
     } else if (line.empty()) {
         std::cout << _socketFD << "NICK ERR_NONICKNAMEGIVEN \n";
         _response.addReply(ERR_NONICKNAMEGIVEN);
+    } else if (!checkNickname(line)) {
+        std::cout << _socketFD << "NICK ERR_ERRONEUSNICKNAME \n";
+        _response.addReply(ERR_ERRONEUSNICKNAME,"","","","","",line);
     } else if (_irc->findClientByNickName(line)) {
         std::cout << _socketFD << "NICK ERR_NICKNAMEINUSE \n";
         _response.addReply(ERR_NICKNAMEINUSE,"",line);
@@ -157,10 +160,9 @@ void       Client::methodPing(std::string line){
     msg.append(":" + _irc->getServerName() + " PONG " + ":" + _irc->getServerName() + " " + line + "\n");
     allocateResponse(msg);
 }
-void       Client::methodWho(std::string line) {
+void       Client::methodWho(std::string line) {}
 
-}
-void       Client::methodPrivmsg(std::string line){
+void       Client::methodPrivmsg(std::string line,bool notice) {
     if (!_isAuthorisedNickUser) {
         _response.addReply(ERR_NOTREGISTERED);
     } else if (line.empty()) {
@@ -171,9 +173,7 @@ void       Client::methodPrivmsg(std::string line){
             _response.addReply(ERR_NOTEXTTOSEND);
             return;
         }
-
         std::vector<std::string> names = split(line.substr(0, pos - 1), ",");
-
         //         std::cout << "PRIVMSG: buffer |" << line << "|\n";
         std::string msg;
         std::string receiverName;
@@ -185,29 +185,46 @@ void       Client::methodPrivmsg(std::string line){
 //                    std::cout << "analyse: PRIVMSG: msg " << msg << "\n";
             if (receiverName[0] == '#' || receiverName[0] == '&') {
                 if (_irc->findChanByName(receiverName) == nullptr) {
-                    _response.addReply(ERR_NOSUCHCHANNEL,receiverName);
-                } else if (_irc->findChanByName(receiverName)->checkChanClientBanned(_nickname)){
-                    _response.addReply(ERR_BANNEDFROMCHAN,receiverName);
+                    if (!notice)
+                        _response.addReply(ERR_NOSUCHCHANNEL, receiverName);
+                } else if (_irc->findChanByName(receiverName)->checkChanClientBanned(_nickname)) {
+                    if (!notice)
+                        _response.addReply(ERR_BANNEDFROMCHAN, receiverName);
                 } else if (!_irc->findChanByName(receiverName)->findClient(_nickname)) {
-                    _response.addReply(ERR_CANNOTSENDTOCHAN,receiverName);
+                    if (!notice)
+                        _response.addReply(ERR_CANNOTSENDTOCHAN, receiverName);
                 } else {
-                    Reply reply(MSG_PRIVMSG,"",receiverName,_nickname,_username,_hostIp,msg);
-                    _irc->findChanByName(receiverName)->setMsgToAllClients(_irc, reply,_nickname);
-                    continue;
+                    if (!notice) {
+                        Reply reply(MSG_PRIVMSG, "", receiverName, _nickname, _username, _hostIp, msg);
+                        _irc->findChanByName(receiverName)->setMsgToAllClients(_irc, reply, _nickname);
+                        continue;
+                    } else {
+                        Reply reply(MSG_NOTICE, "", receiverName, _nickname, _username, _hostIp, msg);
+                        _irc->findChanByName(receiverName)->setMsgToAllClients(_irc, reply, _nickname);
+                        continue;
+                    }
                 }
             } else {
-                if (_irc->findClientByNickName(receiverName) != nullptr) {
-                    Reply reply(MSG_PRIVMSG,"",receiverName,_nickname,_username,_hostIp,msg);
-                    _irc->findClientByNickName(receiverName)->getResponse().addMsg(reply);
-                    _irc->findClientByNickName(receiverName)->generateResponse();
+                if (!notice) {
+                    if (_irc->findClientByNickName(receiverName) != nullptr) {
+                        Reply reply(MSG_PRIVMSG, "", receiverName, _nickname, _username, _hostIp, msg);
+                        _irc->findClientByNickName(receiverName)->getResponse().addMsg(reply);
+                        _irc->findClientByNickName(receiverName)->generateResponse();
+                    } else {
+                        _response.addReply(ERR_NOSUCHNICK, "", receiverName);
+                    }
                 } else {
-                    _response.addReply(ERR_NOSUCHNICK,"",receiverName);
+                    if (_irc->findClientByNickName(receiverName) != nullptr) {
+                        Reply reply(MSG_NOTICE, "", receiverName, _nickname, _username, _hostIp, msg);
+                        _irc->findClientByNickName(receiverName)->getResponse().addMsg(reply);
+                        _irc->findClientByNickName(receiverName)->generateResponse();
+                    }
                 }
             }
         }
     }
 }
-void       Client::methodMode(std::string line){ // TODO messages check
+void       Client::methodMode(std::string line){
     char modeChar = 0;
     int modeSign = -1;
     size_t pos1;
@@ -406,4 +423,31 @@ void       Client::methodInvite(std::string line) {
             _response.addReply(RPL_INVITING,chan,client);
         }
     }
+}
+
+bool       Client::checkUsername(std::string line) {
+//<user>       ::= <nonwhite> { <nonwhite> }
+    return 1;
+}
+
+bool isSpecial(char c){
+    std::string specialCharSet = "-[]\\`^{}";
+    for(int i=0;i!=specialCharSet.size();i++){
+        if(c == specialCharSet[i])
+            return 1;
+    }
+    return 0;
+}
+
+// lenght of 9 maximum
+bool       Client::checkNickname(std::string line) {
+        if(!isalpha(line[0]) || line.size()>9)
+            return 0;
+        for(int i=1;i!=line.size();i++){
+            if(!isalnum(line[i]) && !isSpecial(line[i]))
+                return 0;
+        }
+        return 1;
+//            return 0;
+//    <nick>       ::= <letter> { <letter> | <number> | <special> }
 }

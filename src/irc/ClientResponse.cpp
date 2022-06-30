@@ -7,123 +7,132 @@
 void        Client::generateResponse()
 {
     Reply* currentReply;
+    std::string serverPrefix;
+    std::string hostPrefix;
     std::string bufResp;
-    while(_response.getFrontReply()!=nullptr) {
-        currentReply = _response.getFrontReply();
+    while(_response.getFrontReply()!=_response.getEnd()) {
+        currentReply = _response.getFrontReply().operator->();
+        serverPrefix = ":"+_irc->getServerName();
+        hostPrefix = ":" + currentReply->getSenderNickname() + "!~"+ currentReply->getSenderUsername() + "@" + currentReply->getSenderHostname();
         bufResp="";
-        switch (currentReply->getCode()) { // TODO change all client hostnames
+        switch (currentReply->getCode()) {
             case ERR_NORECIPIENT: {
-                bufResp = ":"+_irc->getServerName()+" "+" 411 : No recipient given (" + _request.getType() + ")\n";
+                bufResp = serverPrefix+" "+" 411 : No recipient given (" + _request.getType() + ")\n";
                 break;
             }
             case ERR_CANNOTSENDTOCHAN: {
-                bufResp = ":"+_irc->getServerName()+" "+" 404 " + currentReply->getChan() + " :Cannot send to channel\n";
+                bufResp = serverPrefix+" "+" 404 " + currentReply->getChan() + " :Cannot send to channel\n";
                 break;
             }
             case ERR_NOSUCHNICK: {
-                bufResp = ":"+_irc->getServerName()+" "+" 401 " + currentReply->getReceiver() + " :No such nick\n";
+                bufResp = serverPrefix+" "+" 401 " + currentReply->getReceiver() + " :No such nick\n";
                 break;
             }
             case ERR_NOSUCHCHANNEL: {
-                bufResp = ":"+_irc->getServerName()+" "+" 403 " + currentReply->getChan() + " :No such channel\n";
+                bufResp = serverPrefix+" "+" 403 " + currentReply->getChan() + " :No such channel\n";
                 break;
             }
             case ERR_NOTEXTTOSEND: {
-                bufResp = ":"+_irc->getServerName()+" "+" 412 : No text to send\n";
+                bufResp = serverPrefix+" "+" 412 : No text to send\n";
                 break;
             }
             case ERR_NEEDMOREPARAMS: {
-                bufResp = ":"+_irc->getServerName()+" "+" 461 " + _request.getType() + " :Not enough parameters\n";
+                bufResp = serverPrefix+" "+" 461 " + _request.getType() + " :Not enough parameters\n";
                 break;
             }
             case ERR_NICKNAMEINUSE: {
-                bufResp = ":"+_irc->getServerName()+" "+" 433 " + currentReply->getReceiver() + " :Nickname is already in use\n";
+                bufResp = serverPrefix+" "+" 433 " + currentReply->getReceiver() + " :Nickname is already in use\n";
                 break;
             }
             case ERR_NOTREGISTERED: {
-                bufResp = ":"+_irc->getServerName()+" "+" 451 : You have not registered\n";
+                bufResp = serverPrefix+" "+" 451 : You have not registered\n";
                 break;
             }
             case ERR_NONICKNAMEGIVEN: {
-                bufResp = ":"+_irc->getServerName()+" "+" 431 : No nickname given\n";
+                bufResp = serverPrefix+" "+" 431 : No nickname given\n";
                 break;
             }
             case ERR_PASSWDMISMATCH: {
-                bufResp = ":"+_irc->getServerName()+" "+" 464 : Password incorrect\n";
+                bufResp = serverPrefix+" "+" 464 : Password incorrect\n";
                 break;
             }
             case ERR_ALREADYREGISTRED: {
-                bufResp= ":"+_irc->getServerName()+" "+" 462 : You may not register\n";
+                bufResp= serverPrefix+" "+" 462 : You may not register\n";
                 break;
             }
             case ERR_NOTONCHANNEL: {
-                bufResp = ":"+_irc->getServerName()+" "+" 442 " + currentReply->getChan() + " : You're not on that channel\n";
+                bufResp = serverPrefix+" "+" 442 " + currentReply->getChan() + " : You're not on that channel\n";
                 break;
             }
             case ERR_UNKNOWNCOMMAND: {
-                bufResp = ":"+_irc->getServerName()+" "+" 421 "+_response.getFrontReply()->getOptional(0)+" :Unknown command\n";
+                bufResp = serverPrefix+" "+" 421 "+_response.getFrontReply()->getOptional(0)+" :Unknown command\n";
                 break;
             }
             case ERR_USERNOTINCHANNEL: {
-                bufResp = ":"+_irc->getServerName()+" "+" 441 " + currentReply->getReceiver() + " " + currentReply->getChan() + " :They aren't on that channel\n";
+                bufResp = serverPrefix+" "+" 441 " + currentReply->getReceiver() + " " + currentReply->getChan() + " :They aren't on that channel\n";
                 break;
             }
             case ERR_USERONCHANNEL: {
-                bufResp = ":"+_irc->getServerName()+" "+" 443 " + currentReply->getReceiver() + " " + currentReply->getReceiver() + " :is already on channel\n";
+                bufResp = serverPrefix+" "+" 443 " + currentReply->getReceiver() + " " + currentReply->getReceiver() + " :is already on channel\n";
                 break;
             }
             case ERR_INVITEONLYCHAN: {
-                bufResp = ":"+_irc->getServerName()+" "+" 473 " + currentReply->getChan() + " :Cannot join channel (+i)\n";
+                bufResp = serverPrefix+" "+" 473 " + currentReply->getChan() + " :Cannot join channel (+i)\n";
                 break;
             }
             case ERR_CHANOPRIVSNEEDED: {
-                bufResp = ":"+_irc->getServerName()+" "+" 482 " + _nickname + " :You're not channel operator\n";
+                bufResp = serverPrefix+" "+" 482 " + _nickname + " :You're not channel operator\n";
+                break;
+            }
+            case ERR_ERRONEUSNICKNAME: {
+//                :nonstop.ix.me.dal.net 432 d f :Erroneous Nickname
+                bufResp = serverPrefix+" "+" 432 " + currentReply->getMsg() + " :Erroneous Nickname\n";
                 break;
             }
             case ERR_UNKNOWNMODE: {
-                bufResp = ":"+_irc->getServerName()+" "+" 472 " + currentReply->getOptional(0) + " :is unknown mode char to me\n";
+                bufResp = serverPrefix+" "+" 472 " + currentReply->getOptional(0) + " :is unknown mode char to me\n";
                 break;
             }
             case ERR_BANNEDFROMCHAN: {
-                bufResp = ":"+_irc->getServerName()+" "+" 465 "+currentReply->getChan()+" :Cannot join channel (+b)";
+                bufResp = serverPrefix+" "+" 465 "+currentReply->getChan()+" :Cannot join channel (+b)";
                 break;
             }
             case RPL_NOTOPIC: {
-                bufResp = ":"+_irc->getServerName()+" 331 "+_nickname+" "+currentReply->getChan()+" :No topic is set.\n";
+                bufResp = serverPrefix+" 331 "+_nickname+" "+currentReply->getChan()+" :No topic is set.\n";
                 break;
             }
             case RPL_TOPIC: {
-                bufResp = ":"+_irc->getServerName()+" 332 "+_nickname+" "+currentReply->getChan()+" :"+currentReply->getMsg()+"\n";
+                bufResp = serverPrefix+" 332 "+_nickname+" "+currentReply->getChan()+" :"+currentReply->getMsg()+"\n";
                 break;
             }
             case RPL_LISTSTART: {
-                bufResp = ":"+_irc->getServerName()+" 321 Channel :Users  Name\n";
+                bufResp = serverPrefix+" 321 Channel :Users  Name\n";
                 break;
             }
             case RPL_LIST: {
                 for(std::vector<Chan>::iterator it = _irc->getChannels().begin();it != _irc->getChannels().end(); it++){
-                    bufResp += ":"+_irc->getServerName()+" 322 "+_nickname+" "+it->getName()+" "+ std::to_string(it->getChanClientsCount()) +" :"+it->getTopic()+"\n";
+                    bufResp += serverPrefix+" 322 "+_nickname+" "+it->getName()+" "+ std::to_string(it->getChanClientsCount()) +" :"+it->getTopic()+"\n";
                 }
                 break;
             }
             case RPL_LISTEND: {
-                bufResp = ":"+_irc->getServerName()+" 323 "+":End of /LIST\n";
+                bufResp = serverPrefix+" 323 "+":End of /LIST\n";
                 break;
             }
             case RPL_INVITING: {
-                bufResp = ":"+_irc->getServerName()+" 341 "+currentReply->getChan()+" "+currentReply->getReceiver()+"\n";
+                bufResp = serverPrefix+" 341 "+currentReply->getChan()+" "+currentReply->getReceiver()+"\n";
                 break;
             }
             case RPL_MOTDSTART:{
-                bufResp = ":"+_irc->getServerName()+" 375 " + _nickname + " : Message of the Day -\n";
+                bufResp = serverPrefix+" 375 " + _nickname + " : Message of the Day -\n";
                 break;
             }
             case RPL_MOTD:{
-                bufResp += ":"+_irc->getServerName()+" 372 " + _nickname + " :Welcomeeeeeeee!\n";
+                bufResp += serverPrefix+" 372 " + _nickname + " :Welcomeeeeeeee!\n";
                 break;
             }
             case RPL_ENDOFMOTD:{
-                bufResp = ":"+_irc->getServerName()+" 376 " + _nickname + " :End of /MOTD command.\n";
+                bufResp = serverPrefix+" 376 " + _nickname + " :End of /MOTD command.\n";
                 break;
             }
             case RPL_NAMREPLY:{
@@ -138,7 +147,7 @@ void        Client::generateResponse()
                 break;
             }
             case REGISTERED: {
-                bufResp = ":"+_irc->getServerName()+" 001 " + _nickname + " :Welcome to the IRC server!\n";
+                bufResp = serverPrefix+" 001 " + _nickname + " :Welcome to the IRC server!\n";
                 break;
             }
             case CODE_NOT_SET: {
@@ -147,54 +156,58 @@ void        Client::generateResponse()
             // messages
             case MSG_INVITE: {
 //                :pe2!~1@188.234.27.34 INVITE pe1 :#pe
-                bufResp = ":" + currentReply->getSenderNickname() + "!~"+ currentReply->getSenderUsername() + "@" + currentReply->getSenderHostname() + " INVITE " + currentReply->getReceiver() + " :" + currentReply->getChan() +"\n";
+                bufResp = hostPrefix + " INVITE " + currentReply->getReceiver() + " :" + currentReply->getChan() +"\n";
                 break;
             }
             case MSG_JOIN: {
 //                :n22!~2@188.234.27.34 JOIN :#pe
-                bufResp = ":" + currentReply->getSenderNickname() + "!~"+ currentReply->getSenderUsername() + "@" + currentReply->getSenderHostname() + " JOIN :" +currentReply->getChan()+ "\n";
+                bufResp = hostPrefix + " JOIN :" +currentReply->getChan()+ "\n";
                 break;
             }
             case MSG_GROUP_KICK: {
                 if(currentReply->getOptional(0).empty())
-                    bufResp = ":" + currentReply->getSenderNickname() + "!~"+ currentReply->getSenderUsername() + "@" + currentReply->getSenderHostname() + " KICK " + currentReply->getChan() + " " + currentReply->getReceiver() + " :"+currentReply->getMsg()+"\n";
+                    bufResp = hostPrefix + " KICK " + currentReply->getChan() + " " + currentReply->getReceiver() + " :"+currentReply->getMsg()+"\n";
                 else
-                    bufResp = ":" + currentReply->getSenderNickname() + "!~"+ currentReply->getSenderUsername() + "@" + currentReply->getSenderHostname() + " KICK " + currentReply->getChan() + " " + currentReply->getReceiver() + " :"+currentReply->getSenderNickname()+"\n";
+                    bufResp = hostPrefix + " KICK " + currentReply->getChan() + " " + currentReply->getReceiver() + " :"+currentReply->getSenderNickname()+"\n";
                 break;
             }
             case MSG_GROUP_PART: {
 //                :n11!~1@188.234.27.34 PART #pe
-                bufResp = ":" + currentReply->getSenderNickname() + "!~"+ currentReply->getSenderUsername() + "@" + currentReply->getSenderHostname() + " PART " + currentReply->getChan() + "\n";
+                bufResp = hostPrefix + " PART " + currentReply->getChan() + "\n";
                 break;
             }
             case MSG_PRIVMSG: {
-                bufResp = ":" + currentReply->getSenderNickname() + "!~"+ currentReply->getSenderUsername() + "@" + currentReply->getSenderHostname() + " PRIVMSG "+currentReply->getReceiver()+" "+currentReply->getMsg()+"\r\n";
+                bufResp = hostPrefix + " PRIVMSG "+currentReply->getReceiver()+" "+currentReply->getMsg()+"\r\n";
+                break;
+            }
+            case MSG_NOTICE: {
+                bufResp = hostPrefix + " NOTICE "+currentReply->getReceiver()+" "+currentReply->getMsg()+"\r\n";
                 break;
             }
             case MSG_GROUP_NEWTOPIC: {
                 //                :Wiz TOPIC #test :New topic
-                bufResp = ":" + currentReply->getSenderNickname() + "!~"+ currentReply->getSenderUsername() + "@" + currentReply->getSenderHostname() + " TOPIC " + currentReply->getChan() + " :" +
+                bufResp = hostPrefix + " TOPIC " + currentReply->getChan() + " :" +
                           currentReply->getMsg() + "\n";
                 break;
             }
             case MSG_GROUP_MODE: {
                 //   :n22!~2@188.234.27.34 MODE #pe +i
-                bufResp = ":" + currentReply->getSenderNickname() + "!~"+ currentReply->getSenderUsername() + "@" + currentReply->getSenderHostname() + " MODE " + currentReply->getChan()+" "+ currentReply->getMsg() + "\n";
+                bufResp = hostPrefix + " MODE " + currentReply->getChan()+" "+ currentReply->getMsg() + "\n";
                 break;
             }
             case MSG_GROUP_BAN: {
                 //                :pepegoB!~1@188.234.27.34 MODE #pe +b pepegoA!*@*
-                bufResp = ":" + currentReply->getSenderNickname() + "!~"+ currentReply->getSenderUsername() + "@" + currentReply->getSenderHostname() + " MODE " + currentReply->getChan()+" "+ currentReply->getMsg() + " "+currentReply->getReceiver()+"\n";
+                bufResp = hostPrefix + " MODE " + currentReply->getChan()+" "+ currentReply->getMsg() + " "+currentReply->getReceiver()+"\n";
                 break;
             }
             case NOTICE_GROUP_INVITE: {
 //                :nonstop.ix.me.dal.net NOTICE @#pe :pe2 invited pe1 into channel #pe
-                bufResp = ":" +_irc->getServerName()+" NOTICE @" + currentReply->getChan() + " :" + currentReply->getSenderNickname() + " invited " + currentReply->getReceiver()+" into chan "+currentReply->getChan() +"\n";
+                bufResp = serverPrefix +" NOTICE @" + currentReply->getChan() + " :" + currentReply->getSenderNickname() + " invited " + currentReply->getReceiver()+" into chan "+currentReply->getChan() +"\n";
                 break;
             }
             case QUIT_MSG: {
 //                n10 [~1@188.234.27.34] has quit IRC: Client closed connection
-                bufResp = ":" + currentReply->getSenderNickname() + "!~"+ currentReply->getSenderUsername() + "@" + currentReply->getSenderHostname() + " QUIT "+currentReply->getMsg()+"\n";
+                bufResp = hostPrefix + " QUIT "+currentReply->getMsg()+"\n";
 //                :fcody!~u@188.234.27.34 QUIT :Quit: KVIrc 5.0.0 Aria http://www.kvirc.net/
                 break;
             }
