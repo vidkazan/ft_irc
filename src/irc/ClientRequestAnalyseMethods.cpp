@@ -3,6 +3,7 @@
 //
 
 #include "Client.hpp"
+#include "../main.hpp"
 
 void       Client::methodQuit(std::string line){
     for(std::vector<Chan>::iterator it=_irc->getChannels().begin();it!=_irc->getChannels().end();it++){
@@ -165,12 +166,20 @@ void       Client::methodPrivmsg(std::string line){
     } else if (line.empty()) {
         _response.addReply(ERR_NORECIPIENT);
     } else {
-                std::cout << "PRIVMSG: buffer |" << line << "|\n";
+        size_t pos = line.find(':');
+        if (pos == std::string::npos) {
+            _response.addReply(ERR_NOTEXTTOSEND);
+            return;
+        }
+
+        std::vector<std::string> names = split(line.substr(0, pos - 1), ",");
+
+        //         std::cout << "PRIVMSG: buffer |" << line << "|\n";
         std::string msg;
         std::string receiverName;
-        size_t pos = line.find(':');
-        if (pos != std::string::npos) {
-            receiverName = line.substr(0, pos - 1);
+
+        for (int i = 0; i < names.size(); i++) {
+            receiverName = names[i];
 //                    std::cout << "analyse: PRIVMSG: receiverName " << receiverName << "\n";
             msg = line.substr(pos, _request.getBuffer().size() - pos);
 //                    std::cout << "analyse: PRIVMSG: msg " << msg << "\n";
@@ -184,7 +193,7 @@ void       Client::methodPrivmsg(std::string line){
                 } else {
                     Reply reply(MSG_PRIVMSG,"",receiverName,_nickname,_username,_hostIp,msg);
                     _irc->findChanByName(receiverName)->setMsgToAllClients(_irc, reply,_nickname);
-                    return;
+                    continue;
                 }
             } else {
                 if (_irc->findClientByNickName(receiverName) != nullptr) {
@@ -195,8 +204,6 @@ void       Client::methodPrivmsg(std::string line){
                     _response.addReply(ERR_NOSUCHNICK,"",receiverName);
                 }
             }
-        } else {
-            _response.addReply(ERR_NOTEXTTOSEND);
         }
     }
 }
@@ -345,16 +352,21 @@ void       Client::methodJoin(std::string line) {
     } else {
         if (line[0] == ':')
             line.erase(line.begin());
-        if (line[0] != '#' && line[0] != '&')
-            line.insert(line.begin(), '#');
-        if(_irc->addChannel(line, _nickname)) {
-            std::cout << "JOIN: for reply: "+_nickname+" "+_username+" "+_hostIp+"\n";
-            Reply reply(MSG_JOIN,line,"",_nickname,_username,_hostIp);
-            _irc->findChanByName(line)->setMsgToAllClients(_irc,reply);
-            methodTopic(line);
-            methodNames(line);
-        } else {
-//                    std::cout << "join: joined already\n";
+
+        std::vector<std::string> channels = split(line, ",");
+
+        for (int i = 0; i < channels.size(); i++) {
+            if (channels[i][0] != '#' && channels[i][0] != '&')
+                channels[i].insert(channels[i].begin(), '#');
+            if(_irc->addChannel(channels[i], _nickname)) {
+                std::cout << "JOIN: for reply: "+_nickname+" "+_username+" "+_hostIp+"\n";
+                Reply reply(MSG_JOIN,channels[i],"",_nickname);
+                _irc->findChanByName(channels[i])->setMsgToAllClients(_irc,reply);
+                methodTopic(channels[i]);
+                methodNames(channels[i]);
+            } else {
+    //                    std::cout << "join: joined already\n";
+            }
         }
     }
 }

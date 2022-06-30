@@ -2,6 +2,7 @@
 // Created by Dmitrii Grigorev on 27.03.22.
 //
 #include "Client.hpp"
+#include "../main.hpp"
 
         Client::Client(int fd, Irc* irc,std::string ip): _socketFD(fd),\
                                         _status(READING),\
