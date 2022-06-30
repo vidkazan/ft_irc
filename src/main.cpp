@@ -104,9 +104,8 @@ int     main(int argc, char ** argv)
             }
 //				std::cout << SOME << "new client: " << fd << WHITE << "\n";
             fcntl(fd, F_SETFL, O_NONBLOCK);
-            Irc.addClient(fd, &Irc);
-            Irc.getClients().back().generateResponse();
-            std::cout << "new client " << fd << ": generate AUTH MSG\n";
+            Irc.addClient(fd, &Irc,inet_ntoa(adrAccept.sin_addr));
+            std::cout << "new client " << fd << " " << inet_ntoa(adrAccept.sin_addr) <<"\n";
         }
         for(std::vector<Client>::iterator it = Irc.getClients().begin();it != Irc.getClients().end(); it++)
         {

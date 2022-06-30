@@ -6,6 +6,7 @@ SRCS =	src/main.cpp \
 		src/other/validateArgv.cpp \
 	    src/irc/ClientRequestParse.cpp \
 	    src/irc/ClientRequestAnalyse.cpp \
+	    src/irc/ClientRequestAnalyseMethods.cpp \
 	    src/irc/ClientResponse.cpp \
 	    src/irc/ClientRequestRead.cpp \
 	    src/irc/ClientRequestChans.cpp \
