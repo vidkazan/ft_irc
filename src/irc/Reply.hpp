@@ -210,7 +210,6 @@ enum replyCodes{
 //    The '*' indicates whether the client has registered
 //    as an Operator.  The '-' or '+' characters represent
 //    whether the client has set an AWAY message or not respectively.
-    RPL_USERHOST = 302,
     REGISTERED = 1,
     CODE_NOT_SET = 0,
 

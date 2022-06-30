@@ -25,12 +25,13 @@ private:
     std::string                      _realname;
     std::string                      _hostname;
     std::string                      _servername;
+    std::string                      _hostIp;
 //                      Auth
     bool                             _isAuthorisedPass;
     bool                             _isAuthorisedNickUser;
 //                      Chans
 public:
-                Client(int fd, Irc* irc);
+                Client(int fd, Irc* irc, std::string ip);
 	            ~Client(){};
     std::string getNickName(){return _nickname;}
 	int         getStatus() const {return _status;};

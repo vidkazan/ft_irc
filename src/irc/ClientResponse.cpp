@@ -11,7 +11,7 @@ void        Client::generateResponse()
     while(_response.getFrontReply()!=nullptr) {
         currentReply = _response.getFrontReply();
         bufResp="";
-        switch (currentReply->getCode()) {
+        switch (currentReply->getCode()) { // TODO change all client hostnames
             case ERR_NORECIPIENT: {
                 bufResp = ":localhost 411 : No recipient given (" + _request.getType() + ")\n";
                 break;
@@ -120,11 +120,6 @@ void        Client::generateResponse()
             }
             case RPL_MOTD:{
                 bufResp += ":"+_irc->getServerName()+" 372 " + _nickname + " :Welcomeeeeeeee!\n";
-                bufResp += ":"+_irc->getServerName()+" 372 " + _nickname + " :Welcomeeeeeeee!\n";
-                bufResp += ":"+_irc->getServerName()+" 372 " + _nickname + " :Welcomeeeeeeee!\n";
-                bufResp += ":"+_irc->getServerName()+" 372 " + _nickname + " :Welcomeeeeeeee!\n";
-                bufResp += ":"+_irc->getServerName()+" 372 " + _nickname + " :Welcomeeeeeeee!\n";
-                bufResp += ":"+_irc->getServerName()+" 372 " + _nickname + " :Welcomeeeeeeee!\n";
                 break;
             }
             case RPL_ENDOFMOTD:{
@@ -137,9 +132,6 @@ void        Client::generateResponse()
             }
             case RPL_ENDOFNAMES:{
                 bufResp = ":" + _irc->getServerName() + " 366 " + currentReply->getChan() + " :End of /NAMES list\n";
-                break;
-            }
-            case RPL_USERHOST:{
                 break;
             }
             case ERR_FILEERROR:{
@@ -202,6 +194,7 @@ void        Client::generateResponse()
             }
             case QUIT_MSG: {
 //                n10 [~1@188.234.27.34] has quit IRC: Client closed connection
+                bufResp = ":"+currentReply->getSender()+"!~u@127.0.0.1 QUIT "+currentReply->getMsg()+"\n";
 //                :fcody!~u@188.234.27.34 QUIT :Quit: KVIrc 5.0.0 Aria http://www.kvirc.net/
                 break;
             }

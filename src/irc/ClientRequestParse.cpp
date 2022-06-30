@@ -71,8 +71,8 @@ void        Client::parseRequest(std::string str)
     else if(_request.getType() == "MODE") {
         _request.setRequestMethod(MODE);
     }
-    else if(_request.getType() == "USERHOST") {
-        _request.setRequestMethod(USERHOST);
+    else if(_request.getType() == "WHO") {
+        _request.setRequestMethod(WHO);
     }
     else {
         _request.setRequestMethod(OTHER_METHOD);

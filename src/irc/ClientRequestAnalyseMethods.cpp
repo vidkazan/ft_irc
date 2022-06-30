@@ -1,11 +1,16 @@
 //
 // Created by Dmitrii Grigorev on 27.03.22.
 //
+
 #include "Client.hpp"
-//         reply only methods
+
 void       Client::methodQuit(std::string line){
-    // TODO send QUIT msg to all groups client takes part
-    // TODO remove client from all groups client takes part
+    for(std::vector<Chan>::iterator it=_irc->getChannels().begin();it!=_irc->getChannels().end();it++){
+        if(it->findClient(_nickname)){
+            it->setMsgToAllClients(_irc,Reply(QUIT_MSG,it->getName(),"", _nickname,line),_nickname);
+            it->removeClient(_nickname);
+        }
+    }
 }
 void       Client::methodNames(std::string line)
 {
@@ -44,11 +49,9 @@ void       Client::methodTopic(std::string line)
             if(setTopic) {
                 _irc->findChanByName(chan)->setTopic(topic);
                 _irc->findChanByName(chan)->setMsgToAllClients(_irc,Reply(MSG_GROUP_NEWTOPIC,chan,"",_nickname,topic));
-                std::cout << ">>>:"+_nickname+" TOPIC add"+chan+" :"+topic+"\n"; // TODO
                 return;
             } else {
                 topic = _irc->findChanByName(chan)->getTopic();
-                std::cout << ">>>:"+_nickname+" TOPIC read"+chan+" :"+topic+"\n"; // TODO
                 if(topic.empty()) {
                     _response.addReply(RPL_NOTOPIC, chan);
                 } else {
@@ -162,7 +165,7 @@ void       Client::methodPrivmsg(std::string line){
     } else if (line.empty()) {
         _response.addReply(ERR_NORECIPIENT);
     } else {
-//                std::cout << "PRIVMSG: buffer |" << line << "|\n";
+                std::cout << "PRIVMSG: buffer |" << line << "|\n";
         std::string msg;
         std::string receiverName;
         size_t pos = line.find(':');
@@ -187,7 +190,7 @@ void       Client::methodPrivmsg(std::string line){
                 if (_irc->findClientByNickName(receiverName) != nullptr) {
                     Reply reply(MSG_PRIVMSG,"",receiverName,_nickname,msg);
                     _irc->findClientByNickName(receiverName)->getResponse().addMsg(reply);
-                    return;
+                    _irc->findClientByNickName(receiverName)->generateResponse();
                 } else {
                     _response.addReply(ERR_NOSUCHNICK,"",receiverName);
                 }
@@ -207,7 +210,7 @@ void       Client::methodMode(std::string line){ // TODO messages check
     std::string client;
     if (!_isAuthorisedNickUser) {
         _response.addReply(ERR_NOTREGISTERED);
-    } else if (line.empty()) {
+    } else if(line.empty()) {
         _response.addReply(ERR_NEEDMOREPARAMS);
     } else {
 //                <channel> {[+|-]|i|t|b} [<user>]
@@ -229,8 +232,10 @@ void       Client::methodMode(std::string line){ // TODO messages check
                 modeSign = -1;
             modeChar = flags[1];
         }
+        else
+            chan = line;
         std::cout << "MODE: |"<<chan<<"|"<<flags<<"|"<<client<<"|\n";
-        if(chan.empty() || flags.empty()) {
+        if(chan.empty()) {
             _response.addReply(ERR_NEEDMOREPARAMS);
         } else if(!_irc->findChanByName(chan)) {
             _response.addReply(ERR_NOSUCHCHANNEL,chan);
@@ -240,14 +245,16 @@ void       Client::methodMode(std::string line){ // TODO messages check
             _response.addReply(ERR_CHANOPRIVSNEEDED,chan);
         } else if(!client.empty() &&!_irc->findChanByName(chan)->findClient(client)) {
             _response.addReply(ERR_USERNOTINCHANNEL,chan,client);
-        } else if(modeChar!='i' && modeChar!='b' && modeChar!='t' || modeSign<0 || flags.size() != 2){
+        } else if((modeChar!='i' && modeChar!='b' && modeChar!='t' && flags.size()==2) || flags.size()>2){
             _response.addReply(ERR_UNKNOWNMODE);
             _response.getLastReply()->addOptional(flags);
         } else {
-            if(client.empty()) {
+            if (flags.empty()) {
+                return;
+            } else if(client.empty() && flags.size()==2) {
                 _irc->findChanByName(chan)->setChanInviteMode(modeChar, modeSign);
                 _irc->findChanByName(chan)->setMsgToAllClients(_irc,Reply(MSG_GROUP_MODE,chan,"",_nickname,flags));
-            } else {
+            } else if(flags.size()==2){
                 _irc->findChanByName(chan)->setMsgToAllClients(_irc,Reply(MSG_GROUP_BAN,chan,client,_nickname,flags));
                 if (flags == "+b") {
                     _irc->findChanByName(chan)->addClientBan(client);

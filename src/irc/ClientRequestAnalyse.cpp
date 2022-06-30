@@ -3,8 +3,9 @@
 //
 #include "Client.hpp"
 
-        Client::Client(int fd, Irc* irc): _socketFD(fd),\
+        Client::Client(int fd, Irc* irc,std::string ip): _socketFD(fd),\
                                         _status(READING),\
+                                        _hostIp(ip),\
                                         _isAuthorisedPass(0),\
                                         _isAuthorisedNickUser(0),\
                                         _irc(irc) {
@@ -39,6 +40,7 @@ void        Client::analyseRequest(std::string line)
             break;
         }
         case QUIT: {
+            methodQuit(line);
             _status = CLOSING;
             break;
         }
@@ -103,13 +105,13 @@ void        Client::analyseRequest(std::string line)
             break;
         }
         case MODE: {
-            methodMode(line); // TODO заглушка для запроса клиента с бан-маской(MODE <chan>)
+            methodMode(line);
             break;
         }
         case USERHOST: {
             break;
         }
-        case WHO: { // TODO WHO <chan>
+        case WHO: {
             methodWho(line);
             break;
         }
