@@ -191,13 +191,13 @@ void       Client::methodPrivmsg(std::string line){
                 } else if (!_irc->findChanByName(receiverName)->findClient(_nickname)) {
                     _response.addReply(ERR_CANNOTSENDTOCHAN,receiverName);
                 } else {
-                    Reply reply(MSG_PRIVMSG,"",receiverName,_nickname,msg);
+                    Reply reply(MSG_PRIVMSG,"",receiverName,_nickname,_username,_hostIp,msg);
                     _irc->findChanByName(receiverName)->setMsgToAllClients(_irc, reply,_nickname);
                     continue;
                 }
             } else {
                 if (_irc->findClientByNickName(receiverName) != nullptr) {
-                    Reply reply(MSG_PRIVMSG,"",receiverName,_nickname,msg);
+                    Reply reply(MSG_PRIVMSG,"",receiverName,_nickname,_username,_hostIp,msg);
                     _irc->findClientByNickName(receiverName)->getResponse().addMsg(reply);
                     _irc->findClientByNickName(receiverName)->generateResponse();
                 } else {
@@ -260,9 +260,9 @@ void       Client::methodMode(std::string line){ // TODO messages check
                 return;
             } else if(client.empty() && flags.size()==2) {
                 _irc->findChanByName(chan)->setChanInviteMode(modeChar, modeSign);
-                _irc->findChanByName(chan)->setMsgToAllClients(_irc,Reply(MSG_GROUP_MODE,chan,"",_nickname,flags));
+                _irc->findChanByName(chan)->setMsgToAllClients(_irc,Reply(MSG_GROUP_MODE,chan,"",_nickname,_username,_hostIp,flags));
             } else if(flags.size()==2){
-                _irc->findChanByName(chan)->setMsgToAllClients(_irc,Reply(MSG_GROUP_BAN,chan,client,_nickname,flags));
+                _irc->findChanByName(chan)->setMsgToAllClients(_irc,Reply(MSG_GROUP_BAN,chan,client,_nickname,_username,_hostIp,flags));
                 if (flags == "+b") {
                     _irc->findChanByName(chan)->addClientBan(client);
                     _irc->findChanByName(chan)->removeClient(client);
@@ -294,7 +294,7 @@ void       Client::methodPart(std::string line){
         _response.addReply(ERR_NOTONCHANNEL,line);
     } else {
 //                :P11!~1@89.232.114.120 PART #pp
-        _irc->findChanByName(line)->setMsgToAllClients(_irc,Reply(MSG_GROUP_PART, line, "",_nickname,msg));
+        _irc->findChanByName(line)->setMsgToAllClients(_irc,Reply(MSG_GROUP_PART, line, "",_nickname,_username,_hostIp,msg));
         _irc->findChanByName(line)->removeClient(_nickname);
     }
 }
@@ -332,7 +332,7 @@ void       Client::methodKick(std::string line){
         } else if(!_irc->findChanByName(chan)->findClient(client)) {
             _response.addReply(ERR_USERNOTINCHANNEL,chan,client);
         } else {
-            Reply reply(MSG_GROUP_KICK,chan,client,_nickname,msg);
+            Reply reply(MSG_GROUP_KICK,chan,client,_nickname,_username,_hostIp,msg);
             reply.addOptional(_nickname);
             _irc->findChanByName(chan)->setMsgToAllClients(_irc, reply);
             _irc->findChanByName(chan)->removeClient(client);
@@ -352,14 +352,15 @@ void       Client::methodJoin(std::string line) {
     } else {
         if (line[0] == ':')
             line.erase(line.begin());
+
         std::vector<std::string> channels = split(line, ",");
 
         for (int i = 0; i < channels.size(); i++) {
             if (channels[i][0] != '#' && channels[i][0] != '&')
                 channels[i].insert(channels[i].begin(), '#');
             if(_irc->addChannel(channels[i], _nickname)) {
+                std::cout << "JOIN: for reply: "+_nickname+" "+_username+" "+_hostIp+"\n";
                 Reply reply(MSG_JOIN,channels[i],"",_nickname);
-                reply.addOptional(_username);
                 _irc->findChanByName(channels[i])->setMsgToAllClients(_irc,reply);
                 methodTopic(channels[i]);
                 methodNames(channels[i]);
@@ -398,7 +399,7 @@ void       Client::methodInvite(std::string line) {
             _response.addReply(ERR_USERONCHANNEL,chan,client);
         } else {
             _irc->findChanByName(chan)->addClientInvite(client);
-            _irc->findChanByName(chan)->setMsgToAllClients(_irc,Reply(NOTICE_GROUP_INVITE,chan,client,_nickname),_nickname);
+            _irc->findChanByName(chan)->setMsgToAllClients(_irc,Reply(NOTICE_GROUP_INVITE,chan,client,_nickname,_username,_hostIp),_nickname);
             _irc->findClientByNickName(client)->getResponse().addMsg(MSG_INVITE,chan,client,_nickname);
             _irc->findClientByNickName(client)->generateResponse();
 
