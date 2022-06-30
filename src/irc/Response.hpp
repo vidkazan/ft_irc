@@ -23,12 +23,12 @@ public:
 		_response = resp;
 	};
 	void                addBytesSent(size_t addBytes){_bytesSent += addBytes;}
-    void addReply(replyCodes code, std::string chan="",std::string receiver="",std::string sender="",std::string msg="") {
-        _replyQueue.push_back(Reply(code,chan,receiver,sender,msg));
+    void addReply(replyCodes code, std::string chan="",std::string receiver="",std::string senderNick="",std::string senderUser="",std::string senderHost="",std::string msg="") {
+        _replyQueue.push_back(Reply(code,chan,receiver,senderNick,senderUser,senderHost,msg));
     }
 
-    void addMsg(replyCodes code, std::string chan="",std::string receiver="",std::string sender="",std::string msg="") {
-        _replyQueue.push_back(Reply(code,chan,receiver,sender,msg));
+    void addMsg(replyCodes code, std::string chan="",std::string receiver="",std::string senderNick="",std::string senderUser="",std::string senderHost="",std::string msg="") {
+        _replyQueue.push_back(Reply(code,chan,receiver,senderNick,senderUser,senderHost,msg));
     }
     void addMsg(Reply msg) {
         _replyQueue.push_back(msg);

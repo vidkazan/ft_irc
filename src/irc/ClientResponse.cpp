@@ -13,79 +13,79 @@ void        Client::generateResponse()
         bufResp="";
         switch (currentReply->getCode()) { // TODO change all client hostnames
             case ERR_NORECIPIENT: {
-                bufResp = ":localhost 411 : No recipient given (" + _request.getType() + ")\n";
+                bufResp = ":"+_irc->getServerName()+" "+" 411 : No recipient given (" + _request.getType() + ")\n";
                 break;
             }
             case ERR_CANNOTSENDTOCHAN: {
-                bufResp = ":localhost 404 " + currentReply->getChan() + " :Cannot send to channel\n";
+                bufResp = ":"+_irc->getServerName()+" "+" 404 " + currentReply->getChan() + " :Cannot send to channel\n";
                 break;
             }
             case ERR_NOSUCHNICK: {
-                bufResp = ":localhost 401 " + currentReply->getReceiver() + " :No such nick\n";
+                bufResp = ":"+_irc->getServerName()+" "+" 401 " + currentReply->getReceiver() + " :No such nick\n";
                 break;
             }
             case ERR_NOSUCHCHANNEL: {
-                bufResp = ":localhost 403 " + currentReply->getChan() + " :No such channel\n";
+                bufResp = ":"+_irc->getServerName()+" "+" 403 " + currentReply->getChan() + " :No such channel\n";
                 break;
             }
             case ERR_NOTEXTTOSEND: {
-                bufResp = ":localhost 412 : No text to send\n";
+                bufResp = ":"+_irc->getServerName()+" "+" 412 : No text to send\n";
                 break;
             }
             case ERR_NEEDMOREPARAMS: {
-                bufResp = ":localhost 461 " + _request.getType() + " :Not enough parameters\n";
+                bufResp = ":"+_irc->getServerName()+" "+" 461 " + _request.getType() + " :Not enough parameters\n";
                 break;
             }
             case ERR_NICKNAMEINUSE: {
-                bufResp = ":localhost 433 " + currentReply->getReceiver() + " :Nickname is already in use\n";
+                bufResp = ":"+_irc->getServerName()+" "+" 433 " + currentReply->getReceiver() + " :Nickname is already in use\n";
                 break;
             }
             case ERR_NOTREGISTERED: {
-                bufResp = ":localhost 451 : You have not registered\n";
+                bufResp = ":"+_irc->getServerName()+" "+" 451 : You have not registered\n";
                 break;
             }
             case ERR_NONICKNAMEGIVEN: {
-                bufResp = ":localhost 431 : No nickname given\n";
+                bufResp = ":"+_irc->getServerName()+" "+" 431 : No nickname given\n";
                 break;
             }
             case ERR_PASSWDMISMATCH: {
-                bufResp = ":localhost 464 : Password incorrect\n";
+                bufResp = ":"+_irc->getServerName()+" "+" 464 : Password incorrect\n";
                 break;
             }
             case ERR_ALREADYREGISTRED: {
-                bufResp= ":localhost 462 : You may not register\n";
+                bufResp= ":"+_irc->getServerName()+" "+" 462 : You may not register\n";
                 break;
             }
             case ERR_NOTONCHANNEL: {
-                bufResp = ":localhost 442 " + currentReply->getChan() + " : You're not on that channel\n";
+                bufResp = ":"+_irc->getServerName()+" "+" 442 " + currentReply->getChan() + " : You're not on that channel\n";
                 break;
             }
             case ERR_UNKNOWNCOMMAND: {
-                bufResp = ":localhost 421 "+_response.getFrontReply()->getOptional(0)+" :Unknown command\n";
+                bufResp = ":"+_irc->getServerName()+" "+" 421 "+_response.getFrontReply()->getOptional(0)+" :Unknown command\n";
                 break;
             }
             case ERR_USERNOTINCHANNEL: {
-                bufResp = ":localhost 441 " + currentReply->getReceiver() + " " + currentReply->getChan() + " :They aren't on that channel\n";
+                bufResp = ":"+_irc->getServerName()+" "+" 441 " + currentReply->getReceiver() + " " + currentReply->getChan() + " :They aren't on that channel\n";
                 break;
             }
             case ERR_USERONCHANNEL: {
-                bufResp = ":localhost 443 " + currentReply->getReceiver() + " " + currentReply->getReceiver() + " :is already on channel\n";
+                bufResp = ":"+_irc->getServerName()+" "+" 443 " + currentReply->getReceiver() + " " + currentReply->getReceiver() + " :is already on channel\n";
                 break;
             }
             case ERR_INVITEONLYCHAN: {
-                bufResp = ":localhost 473 " + currentReply->getChan() + " :Cannot join channel (+i)\n";
+                bufResp = ":"+_irc->getServerName()+" "+" 473 " + currentReply->getChan() + " :Cannot join channel (+i)\n";
                 break;
             }
             case ERR_CHANOPRIVSNEEDED: {
-                bufResp = ":localhost 482 " + _nickname + " :You're not channel operator\n";
+                bufResp = ":"+_irc->getServerName()+" "+" 482 " + _nickname + " :You're not channel operator\n";
                 break;
             }
             case ERR_UNKNOWNMODE: {
-                bufResp = ":localhost 472 " + currentReply->getOptional(0) + " :is unknown mode char to me\n";
+                bufResp = ":"+_irc->getServerName()+" "+" 472 " + currentReply->getOptional(0) + " :is unknown mode char to me\n";
                 break;
             }
             case ERR_BANNEDFROMCHAN: {
-                bufResp = ":localhost 465 "+currentReply->getChan()+" :Cannot join channel (+b)";
+                bufResp = ":"+_irc->getServerName()+" "+" 465 "+currentReply->getChan()+" :Cannot join channel (+b)";
                 break;
             }
             case RPL_NOTOPIC: {
@@ -147,54 +147,54 @@ void        Client::generateResponse()
             // messages
             case MSG_INVITE: {
 //                :pe2!~1@188.234.27.34 INVITE pe1 :#pe
-                bufResp = ":" + currentReply->getSender() + " INVITE " + currentReply->getReceiver() + " :" + currentReply->getChan() +"\n";
+                bufResp = ":" + currentReply->getSenderNickname() + "!~"+ currentReply->getSenderUsername() + "@" + currentReply->getSenderHostname() + " INVITE " + currentReply->getReceiver() + " :" + currentReply->getChan() +"\n";
                 break;
             }
             case MSG_JOIN: {
 //                :n22!~2@188.234.27.34 JOIN :#pe
-                bufResp = ":" + currentReply->getSender()+"!~"+currentReply->getOptional(0)+"@"+_irc->getPortServer().getIp() + " JOIN :" +currentReply->getChan()+ "\n";
+                bufResp = ":" + currentReply->getSenderNickname() + "!~"+ currentReply->getSenderUsername() + "@" + currentReply->getSenderHostname() + " JOIN :" +currentReply->getChan()+ "\n";
                 break;
             }
             case MSG_GROUP_KICK: {
                 if(currentReply->getOptional(0).empty())
-                    bufResp = ":" + currentReply->getSender() + " KICK " + currentReply->getChan() + " " + currentReply->getReceiver() + " :"+currentReply->getMsg()+"\n";
+                    bufResp = ":" + currentReply->getSenderNickname() + "!~"+ currentReply->getSenderUsername() + "@" + currentReply->getSenderHostname() + " KICK " + currentReply->getChan() + " " + currentReply->getReceiver() + " :"+currentReply->getMsg()+"\n";
                 else
-                    bufResp = ":" + currentReply->getSender() + " KICK " + currentReply->getChan() + " " + currentReply->getReceiver() + " :"+currentReply->getSender()+"\n";
+                    bufResp = ":" + currentReply->getSenderNickname() + "!~"+ currentReply->getSenderUsername() + "@" + currentReply->getSenderHostname() + " KICK " + currentReply->getChan() + " " + currentReply->getReceiver() + " :"+currentReply->getSenderNickname()+"\n";
                 break;
             }
             case MSG_GROUP_PART: {
 //                :n11!~1@188.234.27.34 PART #pe
-                bufResp = ":" + currentReply->getSender() + " PART " + currentReply->getChan() + "\n";
+                bufResp = ":" + currentReply->getSenderNickname() + "!~"+ currentReply->getSenderUsername() + "@" + currentReply->getSenderHostname() + " PART " + currentReply->getChan() + "\n";
                 break;
             }
             case MSG_PRIVMSG: {
-                bufResp = ":"+ currentReply->getSender()+" PRIVMSG "+currentReply->getReceiver()+" "+currentReply->getMsg()+"\r\n";
+                bufResp = ":" + currentReply->getSenderNickname() + "!~"+ currentReply->getSenderUsername() + "@" + currentReply->getSenderHostname() + " PRIVMSG "+currentReply->getReceiver()+" "+currentReply->getMsg()+"\r\n";
                 break;
             }
             case MSG_GROUP_NEWTOPIC: {
                 //                :Wiz TOPIC #test :New topic
-                bufResp = ":" + currentReply->getSender() + " TOPIC " + currentReply->getChan() + " :" +
+                bufResp = ":" + currentReply->getSenderNickname() + "!~"+ currentReply->getSenderUsername() + "@" + currentReply->getSenderHostname() + " TOPIC " + currentReply->getChan() + " :" +
                           currentReply->getMsg() + "\n";
                 break;
             }
             case MSG_GROUP_MODE: {
                 //   :n22!~2@188.234.27.34 MODE #pe +i
-                bufResp = ":" + currentReply->getSender() + " MODE " + currentReply->getChan()+" "+ currentReply->getMsg() + "\n";
+                bufResp = ":" + currentReply->getSenderNickname() + "!~"+ currentReply->getSenderUsername() + "@" + currentReply->getSenderHostname() + " MODE " + currentReply->getChan()+" "+ currentReply->getMsg() + "\n";
                 break;
             }
             case MSG_GROUP_BAN: {
                 //                :pepegoB!~1@188.234.27.34 MODE #pe +b pepegoA!*@*
-                bufResp = ":" + currentReply->getSender() + " MODE " + currentReply->getChan()+" "+ currentReply->getMsg() + " "+currentReply->getReceiver()+"\n";
+                bufResp = ":" + currentReply->getSenderNickname() + "!~"+ currentReply->getSenderUsername() + "@" + currentReply->getSenderHostname() + " MODE " + currentReply->getChan()+" "+ currentReply->getMsg() + " "+currentReply->getReceiver()+"\n";
                 break;
             }
             case NOTICE_GROUP_INVITE: {
 //                :nonstop.ix.me.dal.net NOTICE @#pe :pe2 invited pe1 into channel #pe
-                bufResp = ":" +_irc->getServerName()+" NOTICE @" + currentReply->getChan() + " :" + currentReply->getSender() + " invited " + currentReply->getReceiver()+" into chan "+currentReply->getChan() +"\n";
+                bufResp = ":" +_irc->getServerName()+" NOTICE @" + currentReply->getChan() + " :" + currentReply->getSenderNickname() + " invited " + currentReply->getReceiver()+" into chan "+currentReply->getChan() +"\n";
                 break;
             }
             case QUIT_MSG: {
 //                n10 [~1@188.234.27.34] has quit IRC: Client closed connection
-                bufResp = ":"+currentReply->getSender()+"!~u@127.0.0.1 QUIT "+currentReply->getMsg()+"\n";
+                bufResp = ":" + currentReply->getSenderNickname() + "!~"+ currentReply->getSenderUsername() + "@" + currentReply->getSenderHostname() + " QUIT "+currentReply->getMsg()+"\n";
 //                :fcody!~u@188.234.27.34 QUIT :Quit: KVIrc 5.0.0 Aria http://www.kvirc.net/
                 break;
             }
