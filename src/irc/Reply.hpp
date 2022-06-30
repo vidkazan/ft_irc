@@ -233,12 +233,15 @@ private:
     replyCodes _code;
     std::string _chan;
     std::string _receiver;
-    std::string _sender;
+    std::string _senderNickname;
+    std::string _senderUsername;
+    std::string _senderHostname;
     std::string _msg;
     std::vector<std::string> _optionals;
 public:
-    Reply(replyCodes code,std::string chan,std::string receiver,std::string sender="",std::string msg=""):\
-            _code(code),_chan(chan),_receiver(receiver),_sender(sender),_msg(msg) {};
+    Reply(replyCodes code,std::string chan,std::string receiver,std::string senderNickname="",std::string senderUsername="",std::string senderHostname="",std::string msg=""):\
+            _code(code),_chan(chan),_receiver(receiver),_senderNickname(senderNickname), _senderUsername(senderUsername),
+            _senderHostname(senderHostname),_msg(msg) {};
     ~Reply(){};
     replyCodes getCode(){
         return _code;
@@ -249,8 +252,14 @@ public:
     std::string getReceiver(){
         return _receiver;
     }
-    std::string getSender(){
-        return _sender;
+    std::string getSenderNickname(){
+        return _senderNickname;
+    }
+    std::string getSenderUsername(){
+        return _senderUsername;
+    }
+    std::string getSenderHostname(){
+        return _senderHostname;
     }
     std::string getMsg(){
         return _msg;
