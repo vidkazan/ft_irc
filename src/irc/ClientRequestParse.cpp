@@ -32,6 +32,7 @@ void        Client::parseRequest(std::string str)
     }
     else {
         _request.setRequestMethod(NO_METHOD);
+        _lastMethod = "";
         return;
     }
     if(_request.getType() == "PASS") {
@@ -84,5 +85,8 @@ void        Client::parseRequest(std::string str)
     }
     else {
         _request.setRequestMethod(OTHER_METHOD);
+        _lastMethod = "";
+        return;
     }
+    _lastMethod = _request.getType();
 }

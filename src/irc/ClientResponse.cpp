@@ -73,7 +73,7 @@ void        Client::generateResponse()
                 break;
             }
             case ERR_USERNOTINCHANNEL: {
-                bufResp = serverPrefix+" "+" 441 " + currentReply->getReceiver() + " " + currentReply->getChan() + " :They aren't on that channel\n";
+                bufResp = serverPrefix+" 441 " + currentReply->getReceiver() + " " + currentReply->getChan() + " :They aren't on that channel\n";
                 break;
             }
             case ERR_USERONCHANNEL: {
@@ -212,7 +212,7 @@ void        Client::generateResponse()
             }
             case QUIT_MSG: {
 //                n10 [~1@188.234.27.34] has quit IRC: Client closed connection
-                bufResp = hostPrefix + " QUIT "+currentReply->getMsg()+"\n";
+                bufResp = hostPrefix+" QUIT "+currentReply->getMsg()+"\n";
 //                :fcody!~u@188.234.27.34 QUIT :Quit: KVIrc 5.0.0 Aria http://www.kvirc.net/
                 break;
             }
@@ -223,7 +223,7 @@ void        Client::generateResponse()
     }
 }
 void        Client::allocateResponse(std::string bufResp) {
-    int fd = open("mallocs.txt",O_CREAT|O_APPEND|O_WRONLY);
+//    int fd = open("mallocs.txt",O_CREAT|O_APPEND|O_WRONLY);
     std::string newBuf;
     size_t size = 0;
     char *res;
@@ -238,7 +238,8 @@ void        Client::allocateResponse(std::string bufResp) {
     newBuf += bufResp;
     size += bufResp.size();
     res = (char *)malloc(sizeof (char) * (size));
-    dprintf(fd,"MALLOC resp: %p : %s\n",res,bufResp.c_str());
+//    dprintf(fd,"MALLOC resp: %p : %s\n",res,bufResp.c_str());
+//    close(fd);
     for(;i < size;i++){
         res[i] = newBuf[i];
     }

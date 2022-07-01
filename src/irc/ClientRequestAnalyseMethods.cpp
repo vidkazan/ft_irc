@@ -8,7 +8,7 @@
 void       Client::methodQuit(std::string line){
     for(std::vector<Chan>::iterator it=_irc->getChannels().begin();it!=_irc->getChannels().end();it++){
         if(it->findClient(_nickname)){
-            it->setMsgToAllClients(_irc,Reply(QUIT_MSG,it->getName(),"", _nickname,line),_nickname);
+            it->setMsgToAllClients(_irc,Reply(QUIT_MSG,it->getName(),"", _nickname,_username,_hostIp,line),_nickname);
             it->removeClient(_nickname);
         }
     }
@@ -56,7 +56,7 @@ void       Client::methodTopic(std::string line)
                 if(topic.empty()) {
                     _response.addReply(RPL_NOTOPIC, chan);
                 } else {
-                    _response.addReply(RPL_TOPIC, chan,"","",topic);
+                    _response.addReply(RPL_TOPIC, chan,"","","","",topic);
                 }
             }
         }
@@ -445,7 +445,7 @@ bool       Client::checkUsername(std::string line) {
 }
 
 bool       isSpecial(char c){
-    std::string specialCharSet = "-[]\\`^{}";
+    std::string specialCharSet = "-[|]\\`^{}";
     for(int i=0;i!=specialCharSet.size();i++){
         if(c == specialCharSet[i])
             return 1;
