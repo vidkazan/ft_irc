@@ -4,6 +4,10 @@
 
 
 #include "Client.hpp"
+#include <cstdio>
+#include <fcntl.h>
+#include <unistd.h>
+
 void        Client::generateResponse()
 {
     Reply* currentReply;
@@ -136,11 +140,11 @@ void        Client::generateResponse()
                 break;
             }
             case RPL_NAMREPLY:{
-                bufResp = ":" + _irc->getServerName() + " 353 " + _nickname + " = " + currentReply->getOptional(0)+"\n";
+                bufResp =serverPrefix + " 353 " + _nickname + " = " + currentReply->getOptional(0)+"\n";
                 break;
             }
             case RPL_ENDOFNAMES:{
-                bufResp = ":" + _irc->getServerName() + " 366 " + currentReply->getChan() + " :End of /NAMES list\n";
+                bufResp =serverPrefix+ " 366 " + currentReply->getChan() + " :End of /NAMES list\n";
                 break;
             }
             case ERR_FILEERROR:{
@@ -219,6 +223,7 @@ void        Client::generateResponse()
     }
 }
 void        Client::allocateResponse(std::string bufResp) {
+    int fd = open("mallocs.txt",O_CREAT|O_APPEND|O_WRONLY);
     std::string newBuf;
     size_t size = 0;
     char *res;
@@ -228,10 +233,12 @@ void        Client::allocateResponse(std::string bufResp) {
         std::string tmp(_response.getResponse(), _response.getResponseSize());
         newBuf += tmp;
         size += _response.getResponseSize();
+        free(_response.getResponse());
     }
     newBuf += bufResp;
     size += bufResp.size();
     res = (char *)malloc(sizeof (char) * (size));
+    dprintf(fd,"MALLOC resp: %p : %s\n",res,bufResp.c_str());
     for(;i < size;i++){
         res[i] = newBuf[i];
     }

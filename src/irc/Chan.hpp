@@ -82,7 +82,6 @@ public:
                 names+="@";
             names += it->first + " ";
         }
-        names += "\n";
         return  names;
     }
     void addClientInvite(std::string client){
