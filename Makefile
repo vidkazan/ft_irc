@@ -9,7 +9,6 @@ SRCS =	src/main.cpp \
 	    src/irc/ClientRequestAnalyseMethods.cpp \
 	    src/irc/ClientResponse.cpp \
 	    src/irc/ClientRequestRead.cpp \
-	    src/irc/ClientRequestChans.cpp \
 	    src/irc/Chan.cpp \
 	    src/server/Irc.cpp \
 

@@ -20,7 +20,6 @@ enum RequestMethod{
     MODE,
     KICK,
     WHO,
-    USERHOST,
 };
 
 class Request{

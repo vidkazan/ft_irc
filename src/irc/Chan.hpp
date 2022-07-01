@@ -42,7 +42,7 @@ public:
     bool addClient(std::string nickname){
         if(_clients.find(nickname)!=_clients.end())
             return 0;
-        std::cout << "irc: join to chan: " << _name << " by " << nickname << "\n";
+//        std::cout << "irc: join to chan: " << _name << " by " << nickname << "\n";
         t_user_modes clientModes;
         if(_clients.empty())
             clientModes.o = 1;
@@ -66,6 +66,14 @@ public:
     }
     void setMsgToAllClients(Irc* irc,Reply msg, std::string except="");
     int  getChanClientsCount(){return _clients.size();}
+    int  getChanInvitedCount(){return _invitedClients.size();}
+    char getChanInviteFlag(){
+        if(_chanModes.i==1)
+            return '+';
+        else
+            return '-';
+    }
+    int  getChanBannedCount(){return _bannedClients.size();}
     std::string getChanNames() {
         std::string names;
         names += _name+" :";
@@ -89,7 +97,7 @@ public:
         for(std::vector<std::string>::iterator it = _bannedClients.begin();it!=_bannedClients.end();it++) {
             if(client == *it) {
                 _bannedClients.erase(it);
-                std::cout << "MODE: "<<_name<<" UNban "<<client<<"\n";
+//                std::cout << "MODE: "<<_name<<" UNban "<<client<<"\n";
                 return;
             }
         }
@@ -100,8 +108,18 @@ public:
                 return;
             }
         }
-        std::cout << "MODE: "<<_name<<" ban "<<client<<"\n";
+//        std::cout << "MODE: "<<_name<<" ban "<<client<<"\n";
         _bannedClients.push_back(client);
+    }
+    void addOperator(std::string client){
+        if(_clients.find(client)!=_clients.end())
+            _clients.find(client)->second.o=1;
+//        std::cout << "MODE: "<<_name<<" + operator "<<client<<"\n";
+    }
+    void removeOperator(std::string client){
+        if(_clients.find(client)!=_clients.end())
+            _clients.find(client)->second.o=0;
+//        std::cout << "MODE: "<<_name<<" - operator "<<client<<"\n";
     }
     bool isInviteOnly(){return(_chanModes.i);}
     bool isInvitedClient(std::string client) {
@@ -113,7 +131,7 @@ public:
         return 0;
     }
     void setChanInviteMode(char mode,int sign){
-        std::cout << "MODE: "<<_name<<" set mode "<<sign<<mode<<"\n";
+//        std::cout << "MODE: "<<_name<<" set mode "<<sign<<mode<<"\n";
         if(mode == 'i' && ( sign == 0 || sign == 1))
             _chanModes.i = sign;
         if(mode == 't' && ( sign == 0 || sign == 1))

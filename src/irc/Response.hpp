@@ -40,11 +40,11 @@ public:
         else
             return &_replyQueue.back();
     }
-    Reply* getFrontReply() {
-            if(_replyQueue.empty())
-                return nullptr;
-            else
-                return &_replyQueue.front();
+    std::deque<Reply>::iterator getFrontReply() {
+            return _replyQueue.begin();
+    }
+    std::deque<Reply>::iterator getEnd() {
+        return _replyQueue.end();
     }
     void popFrontReply(){
         _replyQueue.pop_front();

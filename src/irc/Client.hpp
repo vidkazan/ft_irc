@@ -19,6 +19,7 @@ private:
 	Response                         _response;
 	Request                          _request;
     Irc*                             _irc;
+    replyCodes                       _lastCode;
 //                      Names
     std::string                      _nickname;
     std::string                      _username;
@@ -33,7 +34,10 @@ private:
 public:
                 Client(int fd, Irc* irc, std::string ip);
 	            ~Client(){};
+    replyCodes  getLastCode(){return _lastCode;}
     std::string getNickName(){return _nickname;}
+    bool        checkNickname(std::string);
+    bool        checkUsername(std::string);
 	int         getStatus() const {return _status;};
     Request&    getRequest(){return _request;};
     Response&   getResponse(){return _response;};
@@ -55,7 +59,7 @@ public:
     void methodPass(std::string);
     void methodTopic(std::string);
     void methodUser(std::string);
-    void methodPrivmsg(std::string);
+    void methodPrivmsg(std::string,bool);
     void methodMode(std::string);
     void methodPart(std::string);
     void methodKick(std::string);

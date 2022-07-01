@@ -68,7 +68,7 @@ enum replyCodes{
 //    - Returned after receiving a NICK message which contains
 //    characters which do not fall in the defined set.  See
 //    section x.x.x for details on valid nicknames.
-//    ERR_ERRONEUSNICKNAME = 432,
+    ERR_ERRONEUSNICKNAME = 432,
 
 //    "<nick> :Nickname is already in use"
 //    - Returned when a NICK message is processed that results
@@ -138,9 +138,6 @@ enum replyCodes{
 
 //    "<channel> :Cannot join channel (+i)"
     ERR_INVITEONLYCHAN = 473,
-
-//    "<channel> :Channel key already set
-//    ERR_KEYSET = 467,
 
 //    "<char> :is unknown mode char to me"
     ERR_UNKNOWNMODE = 472,
@@ -222,9 +219,11 @@ enum replyCodes{
     MSG_PRIVMSG = 1004,
     MSG_GROUP_NEWTOPIC = 1005,
     MSG_GROUP_MODE = 1006,
-    MSG_GROUP_BAN = 1007,
+    MSG_GROUP_EDIT_MODE = 1007,
     NOTICE_GROUP_INVITE = 1008,
     QUIT_MSG = 1009,
+    MSG_NOTICE = 1010,
+    MSG_GROUP_OPER = 1011,
 
 };
 

@@ -7,12 +7,23 @@ void    startMessage(){
 }
 void    mainPrint(Irc & Irc)
 {
+    std::string code;
     write(1,"\E[H\E[2J",7);
-    std::cout << "|" << std::setw(7) << "   id  " << "|" << std::setw(4) << " fd " << "|" << std::setw(10) << "  method  " << "|" << std::setw(10) << "   sent   " << "|" << std::setw(6) << " code " <<"|"<<" received " << "|\n";
+    std::cout << " -------------------------------------------------------\n";
+    std::cout << "|" << std::setw(10) << " nickname " << "|" << std::setw(4) << " fd " << "|" << std::setw(10) << "  method  " << "|" << std::setw(10) << "   sent   " << "|" << std::setw(6) << " code " <<"|"<<" received " << "|\n";
     for(std::vector<Client>::iterator it = Irc.getClients().begin();it != Irc.getClients().end(); it++)
     {
-        std::cout << "|" << std::setw(7) << it->getRequest().getRequestId() << "|" << std::setw(4) << it->getSocketFd() << "|"<< std::setw(10) << it->getRequest().getRequestMethod()<< "|" << std::setw(10) << it->getResponse().getBytesSent() << "|" <<  std::setw(6) << std::to_string(it->getResponse().getFrontReply()->getCode()) << "|" << std::setw(10) << it->getRequest().getBytesReceieved() << "|\n";
+//        if(it->getLastCode() > 0 && it->getLastCode() < 2000)
+            code = std::to_string(it->getLastCode());
+        std::cout << "|" << std::setw(10) << it->getNickName() << "|" << std::setw(4) << it->getSocketFd() << "|"<< std::setw(10) << it->getRequest().getRequestMethod()<< "|" << std::setw(10) << it->getResponse().getBytesSent() << "|" <<  std::setw(6) << code << "|" << std::setw(10) << it->getRequest().getBytesReceieved() << "|\n";
     }
+    std::cout << " -------------------------------------------------------\n";
+    std::cout << " -------------------------------------------------------\n";
+    std::cout << "|" << std::setw(13) << "    chan    " << "|" << std::setw(9) << " #joined " << "|" << std::setw(10) << " #invited " << "|" << std::setw(9) << " #banned " << "|" << std::setw(10) << " inv only "  << "|\n";
+    for(std::vector<Chan>::iterator it=Irc.getChannels().begin();it!=Irc.getChannels().end();it++){
+        std::cout << "|" << std::setw(13) << it->getName() << "|" << std::setw(9) << it->getChanClientsCount() << "|" << std::setw(10) << it->getChanInvitedCount() << "|" << std::setw(9) << it->getChanBannedCount() << "|" << std::setw(10) << it->getChanInviteFlag()  << "|\n";
+    }
+    std::cout << " -------------------------------------------------------\n";
 }
 void    printIrcServers(Irc &Irc)
 {
@@ -68,7 +79,7 @@ int     main(int argc, char ** argv)
 				break;
 			}
 		}
-//        mainPrint(Irc);
+        mainPrint(Irc);
        // finding an event in client sockets array
         for(std::vector<Client>::iterator it = Irc.getClients().begin();it != Irc.getClients().end(); it++)
         {

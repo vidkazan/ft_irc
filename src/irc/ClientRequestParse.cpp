@@ -23,6 +23,7 @@ void        Client::parseRequest(std::string str)
         _request.setType(stringToUpper(str));
     }
     else {
+//        std::cout << "!no method\n";
         _request.setRequestMethod(NO_METHOD);
         return;
     }
