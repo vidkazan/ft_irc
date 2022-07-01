@@ -359,14 +359,14 @@ void       Client::methodKick(std::string line){
     }
 }
 void       Client::methodJoin(std::string line) {
+    // } else if (_irc->findChanByName(line) && _irc->findChanByName(line)->checkChanClientBanned(_nickname)){
+    //     _response.addReply(ERR_BANNEDFROMCHAN,line);
+    // } else if (_irc->findChanByName(line) && _irc->findChanByName(line)->isInviteOnly() && !_irc->findChanByName(line)->isInvitedClient(_nickname)) {
+    //     _response.addReply(ERR_INVITEONLYCHAN, line);
     if (!_isAuthorisedNickUser) {
         _response.addReply(ERR_NOTREGISTERED);
     } else if (line.empty()) {
         _response.addReply(ERR_NEEDMOREPARAMS);
-    } else if (_irc->findChanByName(line) && _irc->findChanByName(line)->checkChanClientBanned(_nickname)){
-        _response.addReply(ERR_BANNEDFROMCHAN,line);
-    } else if (_irc->findChanByName(line) && _irc->findChanByName(line)->isInviteOnly() && !_irc->findChanByName(line)->isInvitedClient(_nickname)) {
-        _response.addReply(ERR_INVITEONLYCHAN, line);
     } else {
         if (line[0] == ':')
             line.erase(line.begin());
@@ -379,9 +379,20 @@ void       Client::methodJoin(std::string line) {
                 _response.addReply(ERR_NOSUCHCHANNEL, channels[i]);
                 continue;
             }
+
+            // не работает с +i
+            if (_irc->findChanByName(channels[i]) && _irc->findChanByName(channels[i])->checkChanClientBanned(_nickname)){
+                _response.addReply(ERR_BANNEDFROMCHAN, channels[i]);
+                continue;
+            }
+            if (_irc->findChanByName(channels[i]) && _irc->findChanByName(channels[i])->isInviteOnly() && !_irc->findChanByName(channels[i])->isInvitedClient(_nickname)) {
+                _response.addReply(ERR_INVITEONLYCHAN, channels[i]);
+                continue;
+            }
+
             if (_irc->addChannel(channels[i], _nickname)) {
 //                std::cout << "JOIN: for reply: "+_nickname+" "+_username+" "+_hostIp+"\n";
-                Reply reply(MSG_JOIN,channels[i],"",_nickname);
+                Reply reply(MSG_JOIN, channels[i], "", _nickname, _username, _hostIp);
                 _irc->findChanByName(channels[i])->setMsgToAllClients(_irc,reply);
                 methodTopic(channels[i]);
                 methodNames(channels[i]);
@@ -414,7 +425,7 @@ void       Client::methodInvite(std::string line) {
             _response.addReply(ERR_CHANOPRIVSNEEDED,chan);
         } else if(!_irc->findClientByNickName(client)) {
             _response.addReply(ERR_NOSUCHNICK,"",client);
-        } else if (_irc->findChanByName(chan) && _irc->findChanByName(chan)->checkChanClientBanned(client)){
+        } else if (_irc->findChanByName(chan) && !_irc->findChanByName(chan)->checkChanClientBanned(client)){
             _response.addReply(ERR_CANNOTSENDTOCHAN,chan);
         } else if(_irc->findChanByName(chan)->findClient(client)) {
             _response.addReply(ERR_USERONCHANNEL,chan,client);
