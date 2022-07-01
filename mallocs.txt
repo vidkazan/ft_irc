@@ -1,0 +1,34 @@
+MALLOC resp: 0x60000311c090 : :localhost 001 n :Welcome to the IRC server!
+
+MALLOC resp: 0x600001b1c060 : :localhost 375 n : Message of the Day -
+
+MALLOC resp: 0x60000111c000 : :localhost 372 n :Welcomeeeeeeee!
+
+MALLOC resp: 0x600000e18000 : :localhost 376 n :End of /MOTD command.
+
+MALLOC resp: 0x600003d14000 : :n!~@ JOIN :#pe
+
+MALLOC resp: 0x600002a1c080 : :localhost 331 n #pe :No topic is set.
+
+MALLOC resp: 0x600001b10000 : :localhost 353 n = #pe :@n 
+
+MALLOC resp: 0x600001110000 : :localhost 366 #pe :End of /NAMES list
+
+MALLOC resp: 0x600003d10010 : :n!~@ JOIN :#p
+
+MALLOC resp: 0x600002a10080 : :localhost 331 n #p :No topic is set.
+
+MALLOC resp: 0x600001c1c000 : :localhost 353 n = #p :@n 
+
+MALLOC resp: 0x60000111c000 : :localhost 366 #p :End of /NAMES list
+
+MALLOC resp: 0x600000d1c000 : :n!~@ JOIN :#r
+
+MALLOC resp: 0x600000818000 : :localhost 331 n #r :No topic is set.
+
+MALLOC resp: 0x600000418000 : :localhost 353 n = #r :@n 
+
+MALLOC resp: 0x600000018000 : :localhost 366 #r :End of /NAMES list
+
+MALLOC resp: 0x600003f1c020 : :n!~1@127.0.0.1 MODE #pe +i
+
