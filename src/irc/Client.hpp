@@ -38,6 +38,7 @@ public:
     std::string getNickName(){return _nickname;}
     bool        checkNickname(std::string);
     bool        checkUsername(std::string);
+    bool        checkChannelName(std::string);
 	int         getStatus() const {return _status;};
     Request&    getRequest(){return _request;};
     Response&   getResponse(){return _response;};

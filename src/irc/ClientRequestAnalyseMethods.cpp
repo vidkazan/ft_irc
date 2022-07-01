@@ -376,9 +376,12 @@ void       Client::methodJoin(std::string line) {
         std::vector<std::string> channels = split(line, ",");
 
         for (int i = 0; i < channels.size(); i++) {
-            if (channels[i][0] != '#' && channels[i][0] != '&')
-                channels[i].insert(channels[i].begin(), '#');
-            if(_irc->addChannel(channels[i], _nickname)) {
+            if (!checkChannelName(channels[i])) {
+                std::cout << _socketFD << "NICK ERR_ERRONEUSNICKNAME \n";
+                _response.addReply(ERR_NOSUCHCHANNEL, "", "", "", "", "", channels[i]);
+                continue;
+            }
+            if (_irc->addChannel(channels[i], _nickname)) {
 //                std::cout << "JOIN: for reply: "+_nickname+" "+_username+" "+_hostIp+"\n";
                 Reply reply(MSG_JOIN,channels[i],"",_nickname);
                 _irc->findChanByName(channels[i])->setMsgToAllClients(_irc,reply);
@@ -453,4 +456,14 @@ bool       Client::checkNickname(std::string line) {
         return 1;
 //            return 0;
 //    <nick>       ::= <letter> { <letter> | <number> | <special> }
+}
+
+bool       Client::checkChannelName(std::string line) {
+    if (line.size() < 2 || (line[0] != '#' && line[0] != '&'))
+        return 0;
+    for (int i = 1; i != line.size(); i++) {
+        if (line[i] == ' ' || line[i] == 7 || line[i] == ',')
+            return 0;
+    }
+    return 1;
 }
