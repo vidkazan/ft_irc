@@ -80,7 +80,8 @@ public:
 
     void        readRequest();
     void        recvBuffer();
-    std::string stringToUpper(std::string str);
+    std::string stringToUpper(std::string);
+    std::string stringToLower(std::string);
 
 };
 

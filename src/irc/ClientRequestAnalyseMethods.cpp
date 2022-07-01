@@ -261,7 +261,7 @@ void       Client::methodMode(std::string line){
             _response.addReply(ERR_NEEDMOREPARAMS);
         } else if(!_irc->findChanByName(chan)) {
             _response.addReply(ERR_NOSUCHCHANNEL,chan);
-        } else if((modeChar!='i' && modeChar!='b' && modeChar!='t' && modeChar!='o' && flags.size()==2) || flags.size()>2) {
+        } else if((((modeChar!='i' && modeChar!='b' && modeChar!='t' && modeChar!='o') || (modeSign!=0 && modeSign!=1)) && flags.size()==2) || flags.size()>2) {
             _response.addReply(ERR_UNKNOWNMODE);
             _response.getLastReply()->addOptional(flags);
         } else {
@@ -425,7 +425,7 @@ void       Client::methodInvite(std::string line) {
             _response.addReply(ERR_CHANOPRIVSNEEDED,chan);
         } else if(!_irc->findClientByNickName(client)) {
             _response.addReply(ERR_NOSUCHNICK,"",client);
-        } else if (_irc->findChanByName(chan) && !_irc->findChanByName(chan)->checkChanClientBanned(client)){
+        } else if (_irc->findChanByName(chan) && _irc->findChanByName(chan)->checkChanClientBanned(client)){
             _response.addReply(ERR_CANNOTSENDTOCHAN,chan);
         } else if(_irc->findChanByName(chan)->findClient(client)) {
             _response.addReply(ERR_USERONCHANNEL,chan,client);
@@ -439,13 +439,12 @@ void       Client::methodInvite(std::string line) {
         }
     }
 }
-
 bool       Client::checkUsername(std::string line) {
 //<user>       ::= <nonwhite> { <nonwhite> }
     return 1;
 }
 
-bool isSpecial(char c){
+bool       isSpecial(char c){
     std::string specialCharSet = "-[]\\`^{}";
     for(int i=0;i!=specialCharSet.size();i++){
         if(c == specialCharSet[i])
@@ -453,7 +452,6 @@ bool isSpecial(char c){
     }
     return 0;
 }
-
 // lenght of 9 maximum
 bool       Client::checkNickname(std::string line) {
         if(!isalpha(line[0]) || line.size()>9)
