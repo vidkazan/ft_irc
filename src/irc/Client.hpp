@@ -19,6 +19,7 @@ private:
 	Response                         _response;
 	Request                          _request;
     Irc*                             _irc;
+    replyCodes                       _lastCode;
 //                      Names
     std::string                      _nickname;
     std::string                      _username;
@@ -33,6 +34,7 @@ private:
 public:
                 Client(int fd, Irc* irc, std::string ip);
 	            ~Client(){};
+    replyCodes  getLastCode(){return _lastCode;}
     std::string getNickName(){return _nickname;}
     bool        checkNickname(std::string);
     bool        checkUsername(std::string);

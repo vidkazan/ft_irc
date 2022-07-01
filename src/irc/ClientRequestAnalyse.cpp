@@ -9,7 +9,8 @@
                                         _hostIp(ip),\
                                         _isAuthorisedPass(0),\
                                         _isAuthorisedNickUser(0),\
-                                        _irc(irc) {
+                                        _irc(irc), \
+                                        _lastCode(CODE_NOT_SET){
                                         }
 
 void        Client::analyseRequest(std::string line)

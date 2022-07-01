@@ -94,7 +94,7 @@ void        Client::generateResponse()
                 break;
             }
             case ERR_BANNEDFROMCHAN: {
-                bufResp = serverPrefix+" "+" 465 "+currentReply->getChan()+" :Cannot join channel (+b)";
+                bufResp = serverPrefix+" "+" 465 "+currentReply->getChan()+" :Cannot join channel (+b)\n";
                 break;
             }
             case RPL_NOTOPIC: {
@@ -136,7 +136,7 @@ void        Client::generateResponse()
                 break;
             }
             case RPL_NAMREPLY:{
-                bufResp = ":" + _irc->getServerName() + " 353 " + _nickname + " = " + currentReply->getOptional(0);
+                bufResp = ":" + _irc->getServerName() + " 353 " + _nickname + " = " + currentReply->getOptional(0)+"\n";
                 break;
             }
             case RPL_ENDOFNAMES:{
@@ -195,7 +195,8 @@ void        Client::generateResponse()
                 bufResp = hostPrefix + " MODE " + currentReply->getChan()+" "+ currentReply->getMsg() + "\n";
                 break;
             }
-            case MSG_GROUP_BAN: {
+            case MSG_GROUP_OPER:
+            case MSG_GROUP_EDIT_MODE: {
                 //                :pepegoB!~1@188.234.27.34 MODE #pe +b pepegoA!*@*
                 bufResp = hostPrefix + " MODE " + currentReply->getChan()+" "+ currentReply->getMsg() + " "+currentReply->getReceiver()+"\n";
                 break;
@@ -212,6 +213,7 @@ void        Client::generateResponse()
                 break;
             }
         }
+        _lastCode = currentReply->getCode();
         _response.popFrontReply();
         allocateResponse(bufResp);
     }
@@ -246,7 +248,7 @@ void        Client::sendResponse()
         size = 999999999;
     if(_response.getResponseSize()) {
         std::string tmp(_response.getResponse(), _response.getResponseSize());
-        std::cout << _socketFD << " send:|" << tmp << "|\n";
+        std::cout << _socketFD << " send: " << tmp << "\n";
         ret = send(_socketFD, _response.getResponse() + _response.getBytesSent(), size, 0x80000); //  SIGPIPE ignore
         if (ret <= 0) {
 //            std::cout << "send " << _socketFD << ": " << "set to CLOSING" << "  \n";
@@ -259,8 +261,8 @@ void        Client::sendResponse()
             return;
         }
         _response.addBytesSent(ret);
-        std::cout << _socketFD << " send: " << " sent " << _response.getBytesSent() << " respSize "
-                  << _response.getResponseSize() << "  \n";
+//        std::cout << _socketFD << " send: " << " sent " << _response.getBytesSent() << " respSize "
+//                  << _response.getResponseSize() << "  \n";
     }
     if(_response.getBytesSent() == (size_t)_response.getResponseSize())
     {
