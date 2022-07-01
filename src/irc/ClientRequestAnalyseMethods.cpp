@@ -49,7 +49,7 @@ void       Client::methodTopic(std::string line)
         } else {
             if(setTopic) {
                 _irc->findChanByName(chan)->setTopic(topic);
-                _irc->findChanByName(chan)->setMsgToAllClients(_irc,Reply(MSG_GROUP_NEWTOPIC,chan,"",_nickname,topic));
+                _irc->findChanByName(chan)->setMsgToAllClients(_irc,Reply(MSG_GROUP_NEWTOPIC,chan,"",_nickname,_username,_hostname,topic));
                 return;
             } else {
                 topic = _irc->findChanByName(chan)->getTopic();
@@ -161,7 +161,6 @@ void       Client::methodPing(std::string line){
     allocateResponse(msg);
 }
 void       Client::methodWho(std::string line) {}
-
 void       Client::methodPrivmsg(std::string line,bool notice) {
     if (!_isAuthorisedNickUser) {
         _response.addReply(ERR_NOTREGISTERED);
@@ -237,7 +236,6 @@ void       Client::methodMode(std::string line){
     } else if(line.empty()) {
         _response.addReply(ERR_NEEDMOREPARAMS);
     } else {
-//                <channel> {[+|-]|i|t|b} [<user>]
         pos1 = line.find_first_of(' ');
         pos2 = line.find_last_of(' ');
         if(pos1!=std::string::npos) {
@@ -283,7 +281,7 @@ void       Client::methodMode(std::string line){
                                                                            _username, _hostIp, flags));
                 if (flags == "+b") {
                     _irc->findChanByName(chan)->addClientBan(client);
-                    methodPart(chan+" :he was banned");
+                    _irc->findClientByNickName(client)->methodPart(chan+" :he was banned");
                 } else if (flags == "-b") {
                     _irc->findChanByName(chan)->deleteClientBan(client);
                 } else if (flags == "+o") {
@@ -378,7 +376,7 @@ void       Client::methodJoin(std::string line) {
         for (int i = 0; i < channels.size(); i++) {
             if (!checkChannelName(channels[i])) {
                 std::cout << _socketFD << "NICK ERR_ERRONEUSNICKNAME \n";
-                _response.addReply(ERR_NOSUCHCHANNEL, "", "", "", "", "", channels[i]);
+                _response.addReply(ERR_NOSUCHCHANNEL, channels[i]);
                 continue;
             }
             if (_irc->addChannel(channels[i], _nickname)) {

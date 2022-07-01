@@ -1,0 +1,98 @@
+MALLOC resp: 0x60000311c090 : :localhost 001 n :Welcome to the IRC server!
+
+MALLOC resp: 0x600001b1c060 : :localhost 375 n : Message of the Day -
+
+MALLOC resp: 0x60000111c000 : :localhost 372 n :Welcomeeeeeeee!
+
+MALLOC resp: 0x600000e18000 : :localhost 376 n :End of /MOTD command.
+
+MALLOC resp: 0x600003d14000 : :n!~@ JOIN :#pe
+
+MALLOC resp: 0x600002a1c080 : :localhost 331 n #pe :No topic is set.
+
+MALLOC resp: 0x600001b10000 : :localhost 353 n = #pe :@n 
+
+MALLOC resp: 0x600001110000 : :localhost 366 #pe :End of /NAMES list
+
+MALLOC resp: 0x600003d10010 : :n!~@ JOIN :#p
+
+MALLOC resp: 0x600002a10080 : :localhost 331 n #p :No topic is set.
+
+MALLOC resp: 0x600001c1c000 : :localhost 353 n = #p :@n 
+
+MALLOC resp: 0x60000111c000 : :localhost 366 #p :End of /NAMES list
+
+MALLOC resp: 0x600000d1c000 : :n!~@ JOIN :#r
+
+MALLOC resp: 0x600000818000 : :localhost 331 n #r :No topic is set.
+
+MALLOC resp: 0x600000418000 : :localhost 353 n = #r :@n 
+
+MALLOC resp: 0x600000018000 : :localhost 366 #r :End of /NAMES list
+
+MALLOC resp: 0x600003f1c020 : :n!~1@127.0.0.1 MODE #pe +i
+
+MALLOC resp: 0x7fb926604170 : :localhost 001 a :Welcome to the IRC server!
+
+MALLOC resp: 0x7fb926604140 : :localhost 375 a : Message of the Day -
+
+MALLOC resp: 0x7fb926604140 : :localhost 372 a :Welcomeeeeeeee!
+
+MALLOC resp: 0x7fb926604140 : :localhost 376 a :End of /MOTD command.
+
+MALLOC resp: 0x7fb9266040b0 : 
+MALLOC resp: 0x7fb926604200 : :a!~a@127.0.0.1 PRIVMSG a :bbbb
+
+MALLOC resp: 0x7fb926604140 : :localhost  401 c :No such nick
+
+MALLOC resp: 0x7fb926604110 : :localhost  401 b :No such nick
+
+MALLOC resp: 0x7fb926704080 : :a!~@ JOIN :#GRE
+
+MALLOC resp: 0x7fb926704240 : :localhost 331 a #GRE :No topic is set.
+
+MALLOC resp: 0x7fb926704200 : :localhost 353 a = #GRE :@a 
+
+MALLOC resp: 0x7fb9267041e0 : :localhost 366 #GRE :End of /NAMES list
+
+MALLOC resp: 0x7fb926704360 : :localhost  403  :No such channel
+
+MALLOC resp: 0x7f9601604170 : :localhost 001 a :Welcome to the IRC server!
+
+MALLOC resp: 0x7f9601604140 : :localhost 375 a : Message of the Day -
+
+MALLOC resp: 0x7f9601604140 : :localhost 372 a :Welcomeeeeeeee!
+
+MALLOC resp: 0x7f9601604140 : :localhost 376 a :End of /MOTD command.
+
+MALLOC resp: 0x7f96015041e0 : 
+MALLOC resp: 0x7f9601405a80 : :a!~@ JOIN :#GRE
+
+MALLOC resp: 0x7f9601405be0 : :localhost 331 a #GRE :No topic is set.
+
+MALLOC resp: 0x7f9601405ba0 : :localhost 353 a = #GRE :@a 
+
+MALLOC resp: 0x7f9601405ba0 : :localhost 366 #GRE :End of /NAMES list
+
+MALLOC resp: 0x7f9601405ba0 : :localhost  403 G :No such channel
+
+MALLOC resp: 0x7fb14e5042d0 : :localhost 001 a :Welcome to the IRC server!
+
+MALLOC resp: 0x7fb14e5042a0 : :localhost 375 a : Message of the Day -
+
+MALLOC resp: 0x7fb14e5042a0 : :localhost 372 a :Welcomeeeeeeee!
+
+MALLOC resp: 0x7fb14e5042a0 : :localhost 376 a :End of /MOTD command.
+
+MALLOC resp: 0x7fb14e604080 : :a!~@ JOIN :#GRE
+
+MALLOC resp: 0x7fb14e604240 : :localhost 331 a #GRE :No topic is set.
+
+MALLOC resp: 0x7fb14e604200 : :localhost 353 a = #GRE :@a 
+
+MALLOC resp: 0x7fb14e6041e0 : :localhost 366 #GRE :End of /NAMES list
+
+MALLOC resp: 0x7fb14e604360 : :localhost  403 G :No such channel
+
+MALLOC resp: 0x7fb14e405a60 : :localhost  403 G :No such channel
+
