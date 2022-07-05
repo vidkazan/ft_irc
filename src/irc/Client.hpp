@@ -20,6 +20,7 @@ private:
 	Request                          _request;
     Irc*                             _irc;
     replyCodes                       _lastCode;
+	std::string 				     _lastMethod;
 //                      Names
     std::string                      _nickname;
     std::string                      _username;
@@ -35,9 +36,11 @@ public:
                 Client(int fd, Irc* irc, std::string ip);
 	            ~Client(){};
     replyCodes  getLastCode(){return _lastCode;}
+	std::string getLastMethod(){return _lastMethod;}
     std::string getNickName(){return _nickname;}
     bool        checkNickname(std::string);
     bool        checkUsername(std::string);
+    bool        checkChannelName(std::string);
 	int         getStatus() const {return _status;};
     Request&    getRequest(){return _request;};
     Response&   getResponse(){return _response;};
@@ -79,7 +82,8 @@ public:
 
     void        readRequest();
     void        recvBuffer();
-    std::string stringToUpper(std::string str);
+    std::string stringToUpper(std::string);
+    std::string stringToLower(std::string);
 
 };
 

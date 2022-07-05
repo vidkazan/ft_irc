@@ -8,7 +8,7 @@
 void       Client::methodQuit(std::string line){
     for(std::vector<Chan>::iterator it=_irc->getChannels().begin();it!=_irc->getChannels().end();it++){
         if(it->findClient(_nickname)){
-            it->setMsgToAllClients(_irc,Reply(QUIT_MSG,it->getName(),"", _nickname,line),_nickname);
+            it->setMsgToAllClients(_irc,Reply(QUIT_MSG,it->getName(),"", _nickname,_username,_hostIp,line),_nickname);
             it->removeClient(_nickname);
         }
     }
@@ -56,7 +56,7 @@ void       Client::methodTopic(std::string line)
                 if(topic.empty()) {
                     _response.addReply(RPL_NOTOPIC, chan);
                 } else {
-                    _response.addReply(RPL_TOPIC, chan,"","",topic);
+                    _response.addReply(RPL_TOPIC, chan,"","","","",topic);
                 }
             }
         }
@@ -261,7 +261,7 @@ void       Client::methodMode(std::string line){
             _response.addReply(ERR_NEEDMOREPARAMS);
         } else if(!_irc->findChanByName(chan)) {
             _response.addReply(ERR_NOSUCHCHANNEL,chan);
-        } else if((modeChar!='i' && modeChar!='b' && modeChar!='t' && modeChar!='o' && flags.size()==2) || flags.size()>2) {
+        } else if((((modeChar!='i' && modeChar!='b' && modeChar!='t' && modeChar!='o') || (modeSign!=0 && modeSign!=1)) && flags.size()==2) || flags.size()>2) {
             _response.addReply(ERR_UNKNOWNMODE);
             _response.getLastReply()->addOptional(flags);
         } else {
@@ -359,14 +359,14 @@ void       Client::methodKick(std::string line){
     }
 }
 void       Client::methodJoin(std::string line) {
+    // } else if (_irc->findChanByName(line) && _irc->findChanByName(line)->checkChanClientBanned(_nickname)){
+    //     _response.addReply(ERR_BANNEDFROMCHAN,line);
+    // } else if (_irc->findChanByName(line) && _irc->findChanByName(line)->isInviteOnly() && !_irc->findChanByName(line)->isInvitedClient(_nickname)) {
+    //     _response.addReply(ERR_INVITEONLYCHAN, line);
     if (!_isAuthorisedNickUser) {
         _response.addReply(ERR_NOTREGISTERED);
     } else if (line.empty()) {
         _response.addReply(ERR_NEEDMOREPARAMS);
-    } else if (_irc->findChanByName(line) && _irc->findChanByName(line)->checkChanClientBanned(_nickname)){
-        _response.addReply(ERR_BANNEDFROMCHAN,line);
-    } else if (_irc->findChanByName(line) && _irc->findChanByName(line)->isInviteOnly() && !_irc->findChanByName(line)->isInvitedClient(_nickname)) {
-        _response.addReply(ERR_INVITEONLYCHAN, line);
     } else {
         if (line[0] == ':')
             line.erase(line.begin());
@@ -374,11 +374,25 @@ void       Client::methodJoin(std::string line) {
         std::vector<std::string> channels = split(line, ",");
 
         for (int i = 0; i < channels.size(); i++) {
-            if (channels[i][0] != '#' && channels[i][0] != '&')
-                channels[i].insert(channels[i].begin(), '#');
-            if(_irc->addChannel(channels[i], _nickname)) {
+            if (!checkChannelName(channels[i])) {
+                std::cout << _socketFD << "NICK ERR_ERRONEUSNICKNAME \n";
+                _response.addReply(ERR_NOSUCHCHANNEL, channels[i]);
+                continue;
+            }
+
+            // не работает с +i
+            if (_irc->findChanByName(channels[i]) && _irc->findChanByName(channels[i])->checkChanClientBanned(_nickname)){
+                _response.addReply(ERR_BANNEDFROMCHAN, channels[i]);
+                continue;
+            }
+            if (_irc->findChanByName(channels[i]) && _irc->findChanByName(channels[i])->isInviteOnly() && !_irc->findChanByName(channels[i])->isInvitedClient(_nickname)) {
+                _response.addReply(ERR_INVITEONLYCHAN, channels[i]);
+                continue;
+            }
+
+            if (_irc->addChannel(channels[i], _nickname)) {
 //                std::cout << "JOIN: for reply: "+_nickname+" "+_username+" "+_hostIp+"\n";
-                Reply reply(MSG_JOIN,channels[i],"",_nickname);
+                Reply reply(MSG_JOIN, channels[i], "", _nickname, _username, _hostIp);
                 _irc->findChanByName(channels[i])->setMsgToAllClients(_irc,reply);
                 methodTopic(channels[i]);
                 methodNames(channels[i]);
@@ -425,21 +439,19 @@ void       Client::methodInvite(std::string line) {
         }
     }
 }
-
 bool       Client::checkUsername(std::string line) {
 //<user>       ::= <nonwhite> { <nonwhite> }
     return 1;
 }
 
-bool isSpecial(char c){
-    std::string specialCharSet = "-[]\\`^{}";
+bool       isSpecial(char c){
+    std::string specialCharSet = "-[|]\\`^{}";
     for(int i=0;i!=specialCharSet.size();i++){
         if(c == specialCharSet[i])
             return 1;
     }
     return 0;
 }
-
 // lenght of 9 maximum
 bool       Client::checkNickname(std::string line) {
         if(!isalpha(line[0]) || line.size()>9)
@@ -451,4 +463,14 @@ bool       Client::checkNickname(std::string line) {
         return 1;
 //            return 0;
 //    <nick>       ::= <letter> { <letter> | <number> | <special> }
+}
+
+bool       Client::checkChannelName(std::string line) {
+    if (line.size() < 2 || (line[0] != '#' && line[0] != '&'))
+        return 0;
+    for (int i = 1; i != line.size(); i++) {
+        if (line[i] == ' ' || line[i] == 7 || line[i] == ',')
+            return 0;
+    }
+    return 1;
 }

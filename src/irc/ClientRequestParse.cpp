@@ -12,6 +12,14 @@ std::string Client::stringToUpper(std::string str){
     return res;
 }
 
+std::string Client::stringToLower(std::string str){
+    std::string res;
+    for(int i=0;i<str.size();i++) {
+        res+= tolower(str[i]);
+    }
+    return res;
+}
+
 void        Client::parseRequest(std::string str)
 {
     size_t pos = str.find(' ');
@@ -23,8 +31,8 @@ void        Client::parseRequest(std::string str)
         _request.setType(stringToUpper(str));
     }
     else {
-//        std::cout << "!no method\n";
         _request.setRequestMethod(NO_METHOD);
+        _lastMethod = "";
         return;
     }
     if(_request.getType() == "PASS") {
@@ -77,5 +85,8 @@ void        Client::parseRequest(std::string str)
     }
     else {
         _request.setRequestMethod(OTHER_METHOD);
+        _lastMethod = "";
+        return;
     }
+    _lastMethod = _request.getType();
 }
